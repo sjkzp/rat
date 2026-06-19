@@ -67,6 +67,8 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 #opts-close{position:absolute;left:400px;top:498px;width:160px;height:29px;background:#787878;color:#fff;border:none;font-size:16px;cursor:pointer;font-family:inherit;}
 #opts-close:hover{background:#999;}
 #opts-controls{position:absolute;left:56px;top:240px;color:#fff;font-size:14px;line-height:1.9;}
+#o-clutch-slow{position:absolute;left:71px;top:343px;width:18px;height:18px;accent-color:#eee;cursor:pointer;}
+#o-clutch-slow-label{position:absolute;left:96px;top:338px;height:28px;display:flex;align-items:center;color:#fff;font-size:16px;cursor:pointer;}
 
 /* ── セーブ ──────────────────────────── */
 #saves{display:none;position:absolute;top:0;left:0;width:960px;height:540px;z-index:50;background:#4b4b4b;}
@@ -223,6 +225,8 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
     <span class="opt-lbl" style="left:56px;top:154px">効果音</span>
     <input class="opt-sl" id="o-sfx"   type="range" min="0" max="1" step="0.01" style="left:220px;top:162px;width:240px">
     <div id="opts-controls">操作方法：<br>　アクセル　　右クリック / Z キー<br>　クラッチ　　左クリック / Shift キー<br>　シフト操作　クラッチ中に矢印キー / マウスジェスチャー</div>
+    <input id="o-clutch-slow" type="checkbox">
+    <label id="o-clutch-slow-label" for="o-clutch-slow">クラッチ操作のとき時間の進みを遅くする</label>
     <button id="opts-close">Close</button>
   </div>
   <!-- セーブ -->
@@ -1081,6 +1085,8 @@ const padInput={accel:false,clutch:false};
 let accelLatchUntil=0;
 let rightAccelHeld=false;
 let leftClutchHeld=false,leftReleaseGuardUntil=0;
+let leftMoveReconstructAllowed=true;
+let clutchSlowdown=S.get('clutchSlowdown',false);
 let gesture=null,gShifted=false;
 let suppressNextStoryClickUntil=0;
 function latchAccel(ms=360){accelLatchUntil=Math.max(accelLatchUntil,performance.now()+ms);}
@@ -1088,7 +1094,7 @@ function raceAccelActive(){return rightAccelHeld||mouse.r||performance.now()<acc
 function raceClutchActive(){return leftClutchHeld||keys['ShiftLeft']||keys['ShiftRight']||padInput.clutch;}
 function releaseLeftRaceInput(e){
   const rightStillHeld=rightAccelHeld||mouse.r||(typeof e.buttons==='number'&&!!(e.buttons&2));
-  leftClutchHeld=false;mouse.l=false;gesture=null;leftReleaseGuardUntil=performance.now()+120;
+  leftClutchHeld=false;mouse.l=false;gesture=null;leftReleaseGuardUntil=performance.now()+400;leftMoveReconstructAllowed=false;
   if(rightStillHeld){rightAccelHeld=true;mouse.r=true;latchAccel(1000);}
   if(!racing)return;
   const st=rStates.find(s=>s.racer.type.toLowerCase()==='player');
@@ -1120,7 +1126,7 @@ stage.addEventListener('mousedown',e=>{
   if(e.target.closest&&e.target.closest('.race-pad'))return;
   if(e.target.closest&&e.target.closest('button,.panel,#util,#title,#opts,#saves'))return;
   if(e.button===0){leftClutchHeld=true;mouse.l=true;leftReleaseGuardUntil=0;}
-  if(e.button===2){rightAccelHeld=true;mouse.r=true;latchAccel(520);}
+  if(e.button===2){leftMoveReconstructAllowed=true;rightAccelHeld=true;mouse.r=true;latchAccel(520);}
   mouse.x=e.clientX; mouse.y=e.clientY;
   if(e.button===0&&racing){gesture={x:e.clientX,y:e.clientY};gShifted=false;}
   if(e.button===0&&!racing){suppressNextStoryClickUntil=performance.now()+250;onStoryClick();}
@@ -1150,9 +1156,9 @@ function isInsideStagePoint(e){
 function syncMouseButtons(e){
   mouse.x=e.clientX; mouse.y=e.clientY;
   if(typeof e.buttons==='number'){
-    if(e.buttons&1&&performance.now()>=leftReleaseGuardUntil){
+    if(e.buttons&1&&leftMoveReconstructAllowed&&performance.now()>=leftReleaseGuardUntil){
       if(!mouse.l||!gesture){gesture={x:e.clientX,y:e.clientY};gShifted=false;}
-      leftClutchHeld=true;mouse.l=true;
+      leftMoveReconstructAllowed=false;leftClutchHeld=true;mouse.l=true;
     }
     if(e.buttons&2){rightAccelHeld=true;mouse.r=true;latchAccel(260);}
   }
@@ -1165,7 +1171,7 @@ document.addEventListener('pointerdown',e=>{
     e.preventDefault();
     try{stage.setPointerCapture(e.pointerId);}catch{}
     if(e.button===0){leftClutchHeld=true;mouse.l=true;leftReleaseGuardUntil=0;gesture={x:e.clientX,y:e.clientY};gShifted=false;}
-    if(e.button===2){rightAccelHeld=true;mouse.r=true;latchAccel(520);}
+    if(e.button===2){leftMoveReconstructAllowed=true;rightAccelHeld=true;mouse.r=true;latchAccel(520);}
   }
 },true);
 document.addEventListener('pointermove',e=>{
@@ -1188,21 +1194,23 @@ document.addEventListener('mousedown',e=>{
     gesture={x:e.clientX,y:e.clientY};gShifted=false;
     e.preventDefault();
   }
-  if(e.button===2){rightAccelHeld=true;mouse.r=true;latchAccel(520);e.preventDefault();}
+  if(e.button===2){leftMoveReconstructAllowed=true;rightAccelHeld=true;mouse.r=true;latchAccel(520);e.preventDefault();}
 },true);
 document.addEventListener('mousemove',e=>{
   if(!racing||!isInsideStagePoint(e))return;
   mouse.x=e.clientX;mouse.y=e.clientY;
   if(typeof e.buttons==='number'){
-    if(e.buttons&1&&performance.now()>=leftReleaseGuardUntil){
+    if(e.buttons&1&&leftMoveReconstructAllowed&&performance.now()>=leftReleaseGuardUntil){
       if(!mouse.l||!gesture){gesture={x:e.clientX,y:e.clientY};gShifted=false;}
-      leftClutchHeld=true;mouse.l=true;
+      leftMoveReconstructAllowed=false;leftClutchHeld=true;mouse.l=true;
     }
     if(e.buttons&2){rightAccelHeld=true;mouse.r=true;latchAccel(260);}
   }
   handleRaceGestureMove(e.clientX,e.clientY);
 },true);
 document.addEventListener('mouseup',reconcileMouseRelease,true);
+window.addEventListener('mouseup',reconcileMouseRelease,true);
+window.addEventListener('pointerup',reconcileMouseRelease,true);
 document.addEventListener('contextmenu',e=>{if(racing&&isInsideStagePoint(e)){latchAccel(700);e.preventDefault();}},true);
 window.addEventListener('blur',()=>{leftClutchHeld=false;mouse.l=false;mouse.r=false;rightAccelHeld=false;accelLatchUntil=0;gesture=null;Object.keys(keys).forEach(k=>delete keys[k]);});
 function bindRacePad(id,key){
@@ -1342,17 +1350,20 @@ async function doRace(){
   startSig.style.opacity='1';startSig.style.transform='scale(1)';
   anim(500,p=>{startSig.style.opacity=1-Math.min(1,p*3);startSig.style.transform=`scale(${LERP(1,1.1,Math.min(p*3,1))})`;}).then(()=>{startSig.style.display='none';});
 
-  const startT=performance.now()/1000;
   let raceLastT=performance.now();
+  let raceElapsed=0;
 
   function nextDt(){return new Promise(res=>{requestAnimationFrame(t=>{const dt=Math.min(Math.max((t-raceLastT)/1000,0),.08);raceLastT=t;res(dt);});});}
 
   // レース本体
   while(rStates.some(s=>s.finish<0)){
     const dt=await nextDt();
-    const elapsed=performance.now()/1000-startT;
+    const slowActive=!!(clutchSlowdown&&pSt&&raceClutchActive());
+    const simDt=dt*(slowActive?.3:1);
+    raceElapsed+=simDt;
+    const elapsed=raceElapsed;
     for(const st of rStates){
-      if(st.finish>=0){st.distance+=st.speed*dt;st.speed*=Math.max(0,1-.1*dt);continue;}
+      if(st.finish>=0){st.distance+=st.speed*simDt;st.speed*=Math.max(0,1-.1*simDt);continue;}
       const isP=st===pSt;
       const accel=!isP||raceAccelActive();
       if(isP){
@@ -1367,9 +1378,9 @@ async function doRace(){
           const vMax=gr>0?st.racer.maxRpm/gr/60*st.racer.wheelSize*Math.PI*st.racer.baseSpeed:999;
           if(st.gear<gearMax(st.racer.trans)&&st.speed>vMax*.92){st.clutch=true;st.shiftCD=Math.max(.02,st.racer.shiftTime);}
         }
-        if(st.clutch){st.shiftCD-=dt;if(st.shiftCD<=0){st.gear=Math.min(st.gear+1,gearMax(st.racer.trans));st.clutch=false;}}
+        if(st.clutch){st.shiftCD-=simDt;if(st.shiftCD<=0){st.gear=Math.min(st.gear+1,gearMax(st.racer.trans));st.clutch=false;}}
       }
-      simStep(st,accel,dt);
+      simStep(st,accel,simDt);
       if(st.distance>=raceSetup.dist&&st.finish<0)st.finish=elapsed;
     }
     // HUD更新
@@ -1389,7 +1400,7 @@ async function doRace(){
     }
     // タコ
     tachoNeedle.style.transform=`rotate(${-LERP(145,-60,ref.rpm)}deg)`;
-    setEngPitch(1+ref.rpm*5);
+    setEngPitch((1+ref.rpm*5)*(slowActive?.75:1));
     // 背景スクロール
     const finishLead=Math.max(0,(.9-ref.racer.x)*10);
     const cam=Math.min(ref.distance,Math.max(0,raceSetup.dist-finishLead));
@@ -1699,6 +1710,8 @@ const oBgm=document.getElementById('o-bgm'); oBgm.value=bgmVol;
 oBgm.addEventListener('input',()=>{bgmVol=+oBgm.value;bgmGain.gain.value=bgmVol;S.set('bgm',bgmVol);});
 const oSfx=document.getElementById('o-sfx'); oSfx.value=sfxVol;
 oSfx.addEventListener('input',()=>{sfxVol=+oSfx.value;sfxGain.gain.value=sfxVol;engGain.gain.value=sfxVol;S.set('sfx',sfxVol);});
+const oClutchSlow=document.getElementById('o-clutch-slow'); oClutchSlow.checked=clutchSlowdown;
+oClutchSlow.addEventListener('change',()=>{clutchSlowdown=oClutchSlow.checked;S.set('clutchSlowdown',clutchSlowdown);});
 
 
 // JSZip非同期ロード
