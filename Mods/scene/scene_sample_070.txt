@@ -1,0 +1,65 @@
+﻿#top
+// 文字を表示
+,,エフェクトサンプル
+,,このサンプルを動かしているシーンファイルは<br>「Mods/scene」フォルダ内の「scene_sample_070.txt」です
+,,エフェクトは「Mods/effect」フォルダ内の画像を参照しており、<br>デフォルトでは「雨」「風」「霧」の3種類があります
+
+// 背景表示
+SetBackground,bg_A
+
+,,エフェクト（雨）を設定します
+
+// エフェクト（雨）を設定
+SetEffect,rain,0,0.3,1.2,0.3,0.2
+
+,,エフェクト（雨）を設定しました
+,,エフェクト（雨）の強さを変更します
+
+// エフェクトを解除
+ClearEffect
+// エフェクト（雨）を設定
+SetEffect,rain,0,1.0,2.4,0.3,0.2
+
+,,エフェクト（雨）の強さを変更しました
+,,エフェクト（風）を設定します
+
+// エフェクトを解除
+ClearEffect
+// エフェクト（風）を設定
+SetEffect,wind,0.3,1.3,0,1.0,0.2
+
+,,エフェクト（風）を設定しました
+,,エフェクト（霧）を設定します
+
+// エフェクトを解除
+ClearEffect
+// エフェクト（霧）を設定
+SetEffect,fog,0,-0.05,0.1,1.0,1.0
+
+,,エフェクト（霧）を設定しました
+,,エフェクトを解除します
+
+// エフェクトを解除
+ClearEffect
+
+,,エフェクトを解除しました
+
+// 背景をクリア
+SetBackground,blue
+
+// もう一度みるかの選択
+SetPen,0.1,0.1
+SetPanel,,,◆選択,Left,,,,,0.3,
+SetPen,0.12,0.17
+SetPanel,Selectable,#retry_select1,もう一度みる,Left,,,,,0.3,
+SetPanel,Selectable,#retry_select2,サンプル一覧に戻る,Left,,,,,0.3,
+,,選択してください
+Stop
+
+#retry_select1
+DisposelAllPanels
+Jump,#top
+
+#retry_select2
+DisposelAllPanels
+Scene,scene_sample_001
