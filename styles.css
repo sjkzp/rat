@@ -6,6 +6,15 @@ img{user-select:none;-webkit-user-select:none;-webkit-user-drag:none;}
 #wrap{position:absolute;width:960px;height:540px;transform-origin:top left;}
 #stage{position:relative;width:960px;height:540px;overflow:hidden;background:#37547e;cursor:default;}
 canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:none;}
+#startup-splash{position:absolute;inset:0;z-index:200;background:#000;opacity:1;transition:opacity .45s ease,visibility 0s linear .45s;}
+#startup-splash.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+#startup-logo-crop{position:absolute;left:315px;top:135px;width:330px;height:235px;overflow:hidden;opacity:0;transform:scale(.97);}
+#startup-logo-crop img{position:absolute;inset:0;width:330px;height:235px;max-width:none;}
+#startup-version{position:absolute;left:0;top:385px;width:960px;text-align:center;color:rgba(255,255,255,.78);font:14px 'Meiryo','MS Gothic',monospace;opacity:0;}
+#startup-splash.ready #startup-logo-crop{animation:startup-logo-in .65s ease-out forwards;}
+#startup-splash.ready #startup-version{animation:startup-version-in .45s ease-out .24s forwards;}
+@keyframes startup-logo-in{to{opacity:1;transform:scale(1)}}
+@keyframes startup-version-in{to{opacity:1}}
 #c-bg   {z-index:1;}
 #c-far  {z-index:2;}
 #c-near {z-index:3;}

@@ -1,3 +1,15 @@
+const RAT_BROWSER_VERSION='2026.06.20.1';
+
+function initStartupSplash(){
+  const splash=document.getElementById('startup-splash');
+  const version=document.getElementById('startup-version');
+  if(!splash||!version)return;
+  version.textContent='ver. '+RAT_BROWSER_VERSION;
+  requestAnimationFrame(()=>splash.classList.add('ready'));
+  setTimeout(()=>splash.classList.add('hidden'),1600);
+}
+initStartupSplash();
+
 function repairStaticUi(){
   const util=document.getElementById('util');
   if(util){
