@@ -1,0 +1,96 @@
+﻿#top
+,,会話→レースのサンプルです
+,,このサンプルを動かしているシーンファイルは<br>「Mods/scene」フォルダ内の「scene_sample_030.txt」です。
+
+// 背景表示
+SetBackground,bg_A
+
+// 画面右側にキャラ画像を表示
+SetPortrait,Koichiro,faceKoichiro_A,0.75,0.25
+山田コウイチロウ,Koichiro,あんたの実力は知ってる！　こっちも出し惜しみはナシだ！
+
+// 画面左側にキャラ画像を表示
+SetPortrait,Miki,faceMiki_A,0.25,0.25
+白州ミキ,Miki,上等！！
+
+// キャラ画像を非表示に
+ClearPortrait
+
+// レース操作方法の表示
+【レース操作方法① PC操作】,,アクセル：マウス右ボタン / Zキー<br>クラッチ：マウス左ボタン / Shiftキー
+【レース操作方法② PC操作】,,シフト操作（マウスの場合）：クラッチを押したままマウスジェスチャー<br>シフト操作（キーボードの場合）：クラッチを押したまま矢印キーで変更
+【レース操作方法③ スマホ操作】,,シフト操作：画面左半分を押してスワイプしてシフト<br>アクセル：画面右半分を押し続ける
+
+// レーサーセッティング
+#racer_setting
+WipeIn,AroundToCenter
+// CPUの設定
+SetRacer,EVR_TYPE_S,1,1.0,3,0.06,0.20,0.60,Standard,MotorCycle5,2.7,0.4
+// プレイヤーの設定
+SetRacer,Pizza,1,1.0,3,0.06,0.20,0.45,Player,MotorCycle5,2.5,0
+Jump,#race
+
+// レース
+#race
+// 背景の設定
+SetBackground,race_sky_night
+SetRaceBackground,race_road,race_city
+// レースBGMの設定
+SetBGM,race
+// 距離、勝ったときのタグ、負けたときのタグを設定
+RaceSetup,400,#race_win,#race_lose
+WipeOut,AroundToCenter
+RaceStart
+
+// 勝ったときのタグ
+#race_win
+WipeIn,LeftToRight
+ClearRacer
+ClearEffect
+ClearItem
+SetBackground,bg_A
+SetRaceBackground
+SetBGM,mute
+WipeOut,RightToLeft
+SetPortrait,Koichiro,faceKoichiro_B,0.75,0.25
+山田コウイチロウ,Koichiro,俺の勝ちだ！！
+// キャラ画像・背景をクリア
+ClearPortrait
+SetBackground,blue
+Jump,#retry_select
+
+// 負けたときのタグ
+#race_lose
+WipeIn,LeftToRight
+ClearRacer
+ClearEffect
+ClearItem
+SetBackground
+SetBackground,bg_A
+SetRaceBackground
+SetBGM,mute
+WipeOut,RightToLeft
+SetPortrait,Miki,faceMiki_B,0.25,0.25
+白州ミキ,Miki,私の勝ちだね！
+// キャラ画像・背景をクリア
+ClearPortrait
+SetBackground,blue
+Jump,#retry_select
+
+// もう一度みるかの選択
+#retry_select
+SetPen,0.1,0.1
+SetPanel,,,◆選択,Left,,,,,0.3,
+SetPen,0.12,0.17
+SetPanel,Selectable,#retry_select1,もう一度みる,Left,,,,,0.3,
+SetPanel,Selectable,#retry_select2,サンプル一覧に戻る,Left,,,,,0.3,
+,,選択してください
+Stop
+
+#retry_select1
+DisposelAllPanels
+Jump,#top
+
+#retry_select2
+DisposelAllPanels
+Scene,scene_sample_001

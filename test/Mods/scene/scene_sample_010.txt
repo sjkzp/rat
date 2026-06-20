@@ -1,0 +1,54 @@
+﻿#top
+// 文字を表示
+,,画像・セリフ表示サンプル
+,,このサンプルを動かしているシーンファイルは<br>「Mods/scene」フォルダ内の「scene_sample_010.txt」です
+,,背景を表示します
+
+// 背景表示
+SetBackground,bg_A
+
+,,背景の表示が完了しました
+,,次にキャラ画像とセリフを表示させます
+
+// 画面右側にキャラ画像を表示
+SetPortrait,Koichiro,faceKoichiro_E,0.75,0.25
+
+// キャラのセリフを表示 ※<br>は改行タグ
+山田コウイチロウ,Koichiro,このままだとやべぇ！<br>ピザが冷めちまう！
+
+// 画面外にキャラ画像を表示
+SetPortrait,Gonzo,faceGonzo_D,-0.25,0.25
+？？？？,,た、た、た、たいへんだーーー！！
+
+// キャラ画像を移動
+MovePortrait,Gonzo,0.25,0.25,0.5
+山田ゴンゾウ,Gonzo,たいへんだーーーー！！
+
+// キャラ画像を変更して表示
+SetPortrait,Koichiro,faceKoichiro_F,,
+山田コウイチロウ,Koichiro,どうした親父……！？
+
+// キャラグラフィックをすべて非表示に
+ClearPortrait
+
+,,このように、セリフにあわせて、画像の表示や移動、表情の変更などがおこなえます
+
+// 背景をクリア
+SetBackground,blue
+
+// もう一度みるかの選択
+SetPen,0.1,0.1
+SetPanel,,,◆選択,Left,,,,,0.3,
+SetPen,0.12,0.17
+SetPanel,Selectable,#retry_select1,もう一度みる,Left,,,,,0.3,
+SetPanel,Selectable,#retry_select2,サンプル一覧に戻る,Left,,,,,0.3,
+,,選択してください
+Stop
+
+#retry_select1
+DisposelAllPanels
+Jump,#top
+
+#retry_select2
+DisposelAllPanels
+Scene,scene_sample_001
