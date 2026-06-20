@@ -4,17 +4,25 @@
 
 #select1_panels
 SetPen,0.1,0.1
-SetPanel,,,◆プレイヤーの基本速度,Left,,,,,0.3,
-SetPen,0.12,0.17
-SetPanel,Selectable,#select1_1,基本速度 1.00,Left,,,,,0.3,
-SetPanel,Selectable,#select1_2,基本速度 1.25,Left,,,,,0.3,
-SetPanel,Selectable,#select1_3,基本速度 1.50,Left,,,,,0.3,
-SetPanel,Selectable,#select1_4,基本速度 1.75,Left,,,,,0.3,
-SetPanel,Selectable,#select1_5,基本速度 2.00,Left,,,,,0.3,
-SetPanel,Selectable,#select1_6,基本速度 2.25,Left,,,,,0.3,
-SetPanel,Selectable,#select1_7,基本速度 2.50,Left,,,,,0.3,
-SetPanel,Selectable,#select1_8,基本速度 2.75,Left,,,,,0.3,
-SetPanel,Selectable,#select1_9,基本速度 3.00,Left,,,,,0.3,
+SetPanel,,,◆プレイヤーの基本速度,Left,,,,,0.8,
+SetPen,0.1,0.17
+SetPanel,Selectable,#select1_1,基本速度 1.00,Left,,,,,0.36,
+SetPen,0.1,0.255
+SetPanel,Selectable,#select1_2,基本速度 1.25,Left,,,,,0.36,
+SetPen,0.1,0.34
+SetPanel,Selectable,#select1_3,基本速度 1.50,Left,,,,,0.36,
+SetPen,0.1,0.425
+SetPanel,Selectable,#select1_4,基本速度 1.75,Left,,,,,0.36,
+SetPen,0.1,0.51
+SetPanel,Selectable,#select1_5,基本速度 2.00,Left,,,,,0.36,
+SetPen,0.52,0.17
+SetPanel,Selectable,#select1_6,基本速度 2.25,Left,,,,,0.36,
+SetPen,0.52,0.255
+SetPanel,Selectable,#select1_7,基本速度 2.50,Left,,,,,0.36,
+SetPen,0.52,0.34
+SetPanel,Selectable,#select1_8,基本速度 2.75,Left,,,,,0.36,
+SetPen,0.52,0.425
+SetPanel,Selectable,#select1_9,基本速度 3.00,Left,,,,,0.36,
 ,,プレイヤーの基本速度は？<br>※倍率に応じて加速や最高速など全ての性能が伸びる
 Stop
 
@@ -57,17 +65,25 @@ Jump,#select2_panels
 #select2_panels
 DisposelAllPanels
 SetPen,0.1,0.1
-SetPanel,,,◆CPUの基本速度,Left,,,,,0.3,
-SetPen,0.12,0.17
-SetPanel,Selectable,#select2_1,基本速度 1.00,Left,,,,,0.3,
-SetPanel,Selectable,#select2_2,基本速度 1.25,Left,,,,,0.3,
-SetPanel,Selectable,#select2_3,基本速度 1.50,Left,,,,,0.3,
-SetPanel,Selectable,#select2_4,基本速度 1.75,Left,,,,,0.3,
-SetPanel,Selectable,#select2_5,基本速度 2.00,Left,,,,,0.3,
-SetPanel,Selectable,#select2_6,基本速度 2.25,Left,,,,,0.3,
-SetPanel,Selectable,#select2_7,基本速度 2.50,Left,,,,,0.3,
-SetPanel,Selectable,#select2_8,基本速度 2.75,Left,,,,,0.3,
-SetPanel,Selectable,#select2_9,基本速度 3.00,Left,,,,,0.3,
+SetPanel,,,◆CPUの基本速度,Left,,,,,0.8,
+SetPen,0.1,0.17
+SetPanel,Selectable,#select2_1,基本速度 1.00,Left,,,,,0.36,
+SetPen,0.1,0.255
+SetPanel,Selectable,#select2_2,基本速度 1.25,Left,,,,,0.36,
+SetPen,0.1,0.34
+SetPanel,Selectable,#select2_3,基本速度 1.50,Left,,,,,0.36,
+SetPen,0.1,0.425
+SetPanel,Selectable,#select2_4,基本速度 1.75,Left,,,,,0.36,
+SetPen,0.1,0.51
+SetPanel,Selectable,#select2_5,基本速度 2.00,Left,,,,,0.36,
+SetPen,0.52,0.17
+SetPanel,Selectable,#select2_6,基本速度 2.25,Left,,,,,0.36,
+SetPen,0.52,0.255
+SetPanel,Selectable,#select2_7,基本速度 2.50,Left,,,,,0.36,
+SetPen,0.52,0.34
+SetPanel,Selectable,#select2_8,基本速度 2.75,Left,,,,,0.36,
+SetPen,0.52,0.425
+SetPanel,Selectable,#select2_9,基本速度 3.00,Left,,,,,0.36,
 ,,CPUの基本速度は？<br>※倍率に応じて加速や最高速など全ての性能が伸びる
 Stop
 
@@ -110,17 +126,25 @@ Jump,#select3_panels
 #select3_panels
 DisposelAllPanels
 SetPen,0.1,0.1
-SetPanel,,,◆CPUのシフトチェンジ時間,Left,,,,,0.3,
-SetPen,0.12,0.17
-SetPanel,Selectable,#select3_1,シフトチェンジ時間 0.1,Left,,,,,0.3,
-SetPanel,Selectable,#select3_2,シフトチェンジ時間 0.2,Left,,,,,0.3,
-SetPanel,Selectable,#select3_3,シフトチェンジ時間 0.3,Left,,,,,0.3,
-SetPanel,Selectable,#select3_4,シフトチェンジ時間 0.5,Left,,,,,0.3,
-SetPanel,Selectable,#select3_5,シフトチェンジ時間 1.0,Left,,,,,0.3,
-SetPanel,Selectable,#select3_6,シフトチェンジ時間 1.5,Left,,,,,0.3,
-SetPanel,Selectable,#select3_7,シフトチェンジ時間 2.0,Left,,,,,0.3,
-SetPanel,Selectable,#select3_8,シフトチェンジ時間 2.5,Left,,,,,0.3,
-SetPanel,Selectable,#select3_9,シフトチェンジ時間 3.0,Left,,,,,0.3,
+SetPanel,,,◆CPUのシフトチェンジ時間,Left,,,,,0.8,
+SetPen,0.1,0.17
+SetPanel,Selectable,#select3_1,シフトチェンジ時間 0.1,Left,,,,,0.36,
+SetPen,0.1,0.255
+SetPanel,Selectable,#select3_2,シフトチェンジ時間 0.2,Left,,,,,0.36,
+SetPen,0.1,0.34
+SetPanel,Selectable,#select3_3,シフトチェンジ時間 0.3,Left,,,,,0.36,
+SetPen,0.1,0.425
+SetPanel,Selectable,#select3_4,シフトチェンジ時間 0.5,Left,,,,,0.36,
+SetPen,0.1,0.51
+SetPanel,Selectable,#select3_5,シフトチェンジ時間 1.0,Left,,,,,0.36,
+SetPen,0.52,0.17
+SetPanel,Selectable,#select3_6,シフトチェンジ時間 1.5,Left,,,,,0.36,
+SetPen,0.52,0.255
+SetPanel,Selectable,#select3_7,シフトチェンジ時間 2.0,Left,,,,,0.36,
+SetPen,0.52,0.34
+SetPanel,Selectable,#select3_8,シフトチェンジ時間 2.5,Left,,,,,0.36,
+SetPen,0.52,0.425
+SetPanel,Selectable,#select3_9,シフトチェンジ時間 3.0,Left,,,,,0.36,
 ,,CPUのシフトチェンジ時間は？<br>※CPUがシフトチェンジする時の所要時間
 Stop
 
