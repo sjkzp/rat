@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.23';
+const RAT_BROWSER_VERSION='2026.06.21.26';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -1769,16 +1769,5 @@ function ensureZipLoader(){
 }
 ensureZipLoader();
 if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
-function bindRepairedUi(){
-  const saves=document.getElementById('saves');
-  const opts=document.getElementById('opts');
-  const saveBtn=document.getElementById('u-save');
-  const optsBtn=document.getElementById('u-opts');
-  const hideBtn=document.getElementById('u-hide');
-  if(saveBtn)saveBtn.onclick=async()=>{saves.style.display='block';await buildSaveScreen(false);};
-  if(optsBtn)optsBtn.onclick=()=>{opts.style.display='block';};
-  if(hideBtn)hideBtn.onclick=hideMessageUi;
-}
-bindRepairedUi();
 requestAnimationFrame(loop);
 initMods();

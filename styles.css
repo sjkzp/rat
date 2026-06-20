@@ -216,8 +216,8 @@ body.mobile-build .tbtn{
   box-shadow:0 6px 18px rgba(0,0,0,.3);
 }
 body.mobile-build .tbtn:active{transform:translateY(2px);filter:brightness(.9);}
-body.mobile-build #speaker{left:80px;width:800px;font-size:22px;}
-body.mobile-build #message{left:80px;width:800px;font-size:22px;line-height:1.35;}
+body.mobile-build #speaker{left:16px;top:50px;width:864px;font-size:22px;}
+body.mobile-build #message{left:16px;top:82px;width:864px;height:87px;font-size:22px;line-height:1.28;}
 body.mobile-build #util{right:10px;bottom:8px;gap:7px;}
 body.mobile-build .ubtn{width:46px;height:46px;}
 body.mobile-build .ubtn img{width:30px;height:30px;opacity:.9;}
