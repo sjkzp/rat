@@ -1,6 +1,6 @@
 {
-  "name": "RAT",
-  "short_name": "RAT",
+  "name": "RAT Mobile Optimized",
+  "short_name": "RAT Mobile",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",

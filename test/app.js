@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.20.13';
+const RAT_BROWSER_VERSION='2026.06.21.mobile.5';
 
 function initStartupSplash(){
   const splash=document.getElementById('startup-splash');
@@ -38,12 +38,22 @@ repairStaticUi();
 (function(){
   const wrap=document.getElementById('wrap');
   function resize(){
-    const s=Math.min(innerWidth/960,innerHeight/540);
+    const viewport=window.visualViewport;
+    const width=viewport?viewport.width:innerWidth;
+    const height=viewport?viewport.height:innerHeight;
+    const offsetLeft=viewport?viewport.offsetLeft:0;
+    const offsetTop=viewport?viewport.offsetTop:0;
+    const s=Math.min(width/960,height/540);
     wrap.style.transform=`scale(${s})`;
-    wrap.style.left=Math.round((innerWidth -960*s)/2)+'px';
-    wrap.style.top =Math.round((innerHeight-540*s)/2)+'px';
+    wrap.style.left=Math.round(offsetLeft+(width-960*s)/2)+'px';
+    wrap.style.top =Math.round(offsetTop +(height-540*s)/2)+'px';
   }
-  resize(); window.addEventListener('resize',resize);
+  resize();
+  window.addEventListener('resize',resize);
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',resize);
+    window.visualViewport.addEventListener('scroll',resize);
+  }
 })();
 
 // ── 設定 ────────────────────────────────────────────────────
@@ -1045,6 +1055,7 @@ function bindRacePad(id,key){
     document.getElementById('race-controls').appendChild(feedback);placeFeedback(e);
     mouse.x=e.clientX;mouse.y=e.clientY;
     if(key==='clutch'){gesture={x:e.clientX,y:e.clientY};gShifted=false;}
+    if(navigator.vibrate)navigator.vibrate(key==='accel'?10:14);
   });
   el.addEventListener('pointermove',e=>{
     if(e.pointerId!==pointerId)return;
@@ -1058,7 +1069,7 @@ function bindRacePad(id,key){
     if(key==='clutch'){
       gesture=null;
       const st=rStates.find(s=>s.racer.type.toLowerCase()==='player');
-      if(st){if(st.clutchGear!==st.gear){playShiftEffect(st);st.clutchGear=st.gear;}st.clutch=false;}
+      if(st){if(st.clutchGear!==st.gear){playShiftEffect(st);if(navigator.vibrate)navigator.vibrate(24);st.clutchGear=st.gear;}st.clutch=false;}
     }
   };
   el.addEventListener('pointerup',release);
@@ -1409,8 +1420,33 @@ function captureStagePreview(){
   }
   return out.toDataURL('image/jpeg',.72);
 }
-const SAVE_DB_NAME='RATSaveDB',SAVE_DB_VERSION=1;
+let SAVE_DB_NAME='RATSaveDB_unconfigured';
+let LEGACY_SAVE_DB_NAMES=[];
+const SAVE_DB_VERSION=1;
 let saveDbPromise=null,saveMigrationPromise=null;
+function hashGameId(value){
+  let hash=2166136261;
+  for(let i=0;i<value.length;i++){hash^=value.charCodeAt(i);hash=Math.imul(hash,16777619);}
+  return (hash>>>0).toString(36);
+}
+async function configureSaveDatabase(){
+  let config=null;
+  try{config=JSON.parse(await readText('game.json'));}catch{}
+  let gameId=config&&typeof config.gameId==='string'?config.gameId.trim():'';
+  if(!gameId){
+    const path=location.pathname.replace(/\/+$/,'')||'/';
+    let basis=path;
+    if(path==='/'){
+      try{basis=await readText('scene/_entrypoint.txt');}
+      catch{try{basis=await readText('scene/scene_001.txt');}catch{basis=document.title||'rat-game';}}
+    }
+    gameId='auto-'+hashGameId(basis);
+  }
+  const safeId=gameId.toLowerCase().replace(/[^a-z0-9._-]+/g,'-').replace(/^-+|-+$/g,'')||('game-'+hashGameId(gameId));
+  SAVE_DB_NAME='RATSaveDB_'+safeId;
+  LEGACY_SAVE_DB_NAMES=config&&config.legacySaveGameId===gameId&&Array.isArray(config.legacySaveDatabases)
+    ?config.legacySaveDatabases.filter(name=>typeof name==='string'&&name&&name!==SAVE_DB_NAME):[];
+}
 function openSaveDb(){
   if(saveDbPromise)return saveDbPromise;
   saveDbPromise=new Promise((resolve,reject)=>{
@@ -1424,6 +1460,23 @@ function openSaveDb(){
     req.onerror=()=>reject(req.error);
   });
   return saveDbPromise;
+}
+function readLegacySaveSlots(name){
+  return new Promise(resolve=>{
+    let created=false;
+    const req=indexedDB.open(name);
+    req.onupgradeneeded=()=>{created=true;};
+    req.onerror=()=>resolve([]);
+    req.onsuccess=()=>{
+      const db=req.result;
+      if(created||!db.objectStoreNames.contains('slots')){
+        db.close();if(created)indexedDB.deleteDatabase(name);resolve([]);return;
+      }
+      const get=db.transaction('slots','readonly').objectStore('slots').getAll();
+      get.onsuccess=()=>{db.close();resolve(get.result||[]);};
+      get.onerror=()=>{db.close();resolve([]);};
+    };
+  });
 }
 async function idbGet(store,key){
   const db=await openSaveDb();
@@ -1443,6 +1496,11 @@ function ensureSaveMigration(){
   if(saveMigrationPromise)return saveMigrationPromise;
   saveMigrationPromise=(async()=>{
     if(await idbGet('meta','legacy-localstorage-v1'))return;
+    for(const name of LEGACY_SAVE_DB_NAMES){
+      for(const slot of await readLegacySaveSlots(name)){
+        if(slot&&Number.isInteger(slot.id)&&!await idbGet('slots',slot.id))await idbPut('slots',slot);
+      }
+    }
     for(let i=0;i<8;i++){
       if(await idbGet('slots',i))continue;
       const data=localStorage.getItem('RAT.sv'+i);if(!data)continue;
@@ -1623,6 +1681,7 @@ async function modsOK(){
   statusEl.textContent='Now Loading...';
   loadingProgress.classList.add('active');
   try{
+    await configureSaveDatabase();
     await loadTheme();
     statusEl.textContent='';
     setTitleLoading(false);
@@ -1633,7 +1692,7 @@ async function modsOK(){
 async function initMods(){
   statusEl.textContent='Mods/ を確認中...';
   if(await tryFetch()){await modsOK();return;}
-  statusEl.textContent='📂 Modsフォルダを選択  または  ZIPをドロップ';
+  statusEl.innerHTML='📂 <span class="folder-pick-link">Modsフォルダを選択</span>';
   statusEl.style.cursor='pointer';
 }
 
