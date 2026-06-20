@@ -62,8 +62,8 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 #title-status{position:absolute;left:0;bottom:16px;width:960px;text-align:center;font-size:14px;color:#fff;}
 #loading-progress{display:none;position:absolute;left:360px;bottom:42px;width:240px;height:4px;overflow:hidden;background:rgba(255,255,255,.22);}
 #loading-progress.active{display:block;}
-#loading-progress span{position:absolute;top:0;left:0;width:38%;height:100%;background:#fff;animation:loading-slide 1.05s ease-in-out infinite;}
-@keyframes loading-slide{0%{transform:translateX(-105%)}50%{transform:translateX(170%)}100%{transform:translateX(-105%)}}
+#loading-progress span{position:absolute;top:0;left:0;width:100%;height:100%;background:#fff;transform:scaleX(0);transform-origin:left center;animation:loading-fill 1.4s ease-out infinite;}
+@keyframes loading-fill{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
 
 /* ── オプション ──────────────────────── */
 #opts{display:none;position:absolute;top:0;left:0;width:960px;height:540px;z-index:50;background:#4b4b4b;}
@@ -175,6 +175,7 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
   #race-controls #pad-accel{left:auto;right:0;}
   #race-controls #pad-clutch.active{background:rgba(80,130,210,.10);}
   #race-controls #pad-accel.active{background:rgba(40,190,100,.10);}
+  #SpeedDisplay{top:443px!important;}
 
   #saves-close{top:458px;width:180px;height:34px;left:390px;font-size:16px;}
   #opts-close{top:468px;width:180px;height:34px;left:390px;font-size:16px;}
