@@ -5,16 +5,23 @@
 #sample_select
 // 選択肢を表示
 SetPen,0.1,0.1
-SetPanel,,,◆サンプル,Left,,,,,0.3,
-SetPen,0.12,0.17
-SetPanel,Selectable,#sample_select1,画像・セリフ表示,Left,,,,,0.3,
-SetPanel,Selectable,#sample_select2,選択肢,Left,,,,,0.3,
-SetPanel,Selectable,#sample_select3,会話→レース,Left,,,,,0.3,
-SetPanel,Selectable,#sample_select4,速度チェック（バイク）,Left,,,,,0.3,
-SetPanel,Selectable,#sample_select5,速度チェック（クルマ）,Left,,,,,0.3,
-SetPanel,Selectable,#sample_select6,ショップ,Left,,,,,0.3,
-SetPanel,Selectable,#sample_select7,エフェクト,Left,,,,,0.3,
-SetPanel,Selectable,#sample_select8,エフェクト（レース）,Left,,,,,0.3,
+SetPanel,,,◆サンプル,Left,,,,,0.8,
+SetPen,0.1,0.18
+SetPanel,Selectable,#sample_select1,画像・セリフ表示,Left,,,,,0.36,
+SetPen,0.1,0.275
+SetPanel,Selectable,#sample_select2,選択肢,Left,,,,,0.36,
+SetPen,0.1,0.37
+SetPanel,Selectable,#sample_select3,会話→レース,Left,,,,,0.36,
+SetPen,0.1,0.465
+SetPanel,Selectable,#sample_select4,速度チェック（バイク）,Left,,,,,0.36,
+SetPen,0.52,0.18
+SetPanel,Selectable,#sample_select5,速度チェック（クルマ）,Left,,,,,0.36,
+SetPen,0.52,0.275
+SetPanel,Selectable,#sample_select6,ショップ,Left,,,,,0.36,
+SetPen,0.52,0.37
+SetPanel,Selectable,#sample_select7,エフェクト,Left,,,,,0.36,
+SetPen,0.52,0.465
+SetPanel,Selectable,#sample_select8,エフェクト（レース）,Left,,,,,0.36,
 ,,みたいサンプルを選択してください
 Stop
 
