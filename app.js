@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.20.11';
+const RAT_BROWSER_VERSION='2026.06.20.13';
 
 function initStartupSplash(){
   const splash=document.getElementById('startup-splash');
@@ -825,7 +825,7 @@ function applyItems(r){
       switch(k.toLowerCase()){
         case 'texture':r.texId=v;break;
         case 'transmission':r.trans=v;break;
-        case 'rpm':r.maxRpm*=m;r.minRpm*=m;r.powerRpm*=m;r.dropRpm*=m;break;
+        case 'rpm':case 'maxspeed':r.maxRpm*=m;r.minRpm*=m;r.powerRpm*=m;r.dropRpm*=m;break;
         case 'gearratio':r.finalGear*=m;break;
         case 'airdrag':r.airDrag*=m;break;
         case 'weight':r.weight*=m;break;
