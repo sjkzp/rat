@@ -12,7 +12,7 @@ function repairStaticUi(){
   if(labels[1])labels[1].textContent='BGM音量';
   if(labels[2])labels[2].textContent='効果音量';
   const controls=document.getElementById('opts-controls');
-  if(controls)controls.innerHTML='操作方法:<br>PC　アクセル: 右クリック / Zキー<br>PC　クラッチ: 左クリック / Shiftキー<br>PC　シフト: クラッチ中に矢印キー / マウスジェスチャー<br>スマホ　左半分: クラッチ / スワイプでシフト<br>スマホ　右半分: アクセル';
+  if(controls)controls.innerHTML='操作方法:<br>PC　アクセル: 右クリック / Zキー<br>PC　クラッチ: 左クリック / Shiftキー<br>PC　シフト: クラッチ中に矢印キー / マウスジェスチャー<br>スマホ　画面左半分: クラッチ / スワイプでシフト<br>スマホ　画面右半分: アクセル';
   const status=document.getElementById('title-status');
   if(status)status.textContent='読み込み中...';
 }

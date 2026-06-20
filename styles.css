@@ -162,4 +162,19 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
   #race-controls #pad-accel{left:auto;right:0;}
   #race-controls #pad-clutch.active{background:rgba(80,130,210,.10);}
   #race-controls #pad-accel.active{background:rgba(40,190,100,.10);}
+
+  #saves-close{top:458px;width:180px;height:34px;left:390px;font-size:16px;}
+  #opts-close{top:468px;width:180px;height:34px;left:390px;font-size:16px;}
+  .slot-savebtn,.slot-loadbtn{height:32px;font-size:15px;}
+
+  #o-clutch-slow{top:420px;width:22px;height:22px;}
+  #o-clutch-slow-label{top:416px;height:30px;}
+  .opt-sl{height:12px;}
+  .opt-sl::-webkit-slider-thumb{width:26px;height:26px;}
+
+  #util{right:8px;bottom:8px;gap:5px;}
+  .ubtn{width:40px;height:40px;}
+  .ubtn img{width:26px;height:26px;}
+  .tbtn{height:38px;font-size:17px;}
+  #title-btns{gap:8px;}
 }
