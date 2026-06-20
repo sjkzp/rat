@@ -260,10 +260,6 @@ body.mobile-build .slot-lbl{font-size:14px;padding:5px 0;}
 body.mobile-build .slot-savebtn,body.mobile-build .slot-loadbtn{height:40px;font-size:17px;font-weight:700;border-radius:3px;}
 body.mobile-build #saves-close{position:fixed;}
 
-body.mobile-build #race-controls.visible::after{
-  content:"";position:absolute;left:50%;top:70px;bottom:70px;width:1px;
-  background:linear-gradient(transparent,rgba(255,255,255,.14),transparent);pointer-events:none;
-}
 body.mobile-build #race-controls .race-pad::after{
   content:"";position:absolute;bottom:42px;width:118px;height:118px;border-radius:50%;
   border:2px solid rgba(255,255,255,.14);background:rgba(0,0,0,.05);

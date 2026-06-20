@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.mobile.15';
+const RAT_BROWSER_VERSION='2026.06.21.mobile.16';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -998,7 +998,7 @@ function syncMouseButtons(e){
   }
 }
 document.addEventListener('pointerdown',e=>{
-  if(e.target.closest&&e.target.closest('.race-pad'))return;
+  if(e.target.closest&&e.target.closest('.race-pad,.mobile-race-zone'))return;
   if(!isInsideStagePoint(e))return;
   syncMouseButtons(e);
   if(racing){
@@ -1010,7 +1010,7 @@ document.addEventListener('pointerdown',e=>{
 },true);
 document.addEventListener('pointermove',e=>{
   if(!racing)return;
-  if(e.target.closest&&e.target.closest('.race-pad'))return;
+  if(e.target.closest&&e.target.closest('.race-pad,.mobile-race-zone'))return;
   syncMouseButtons(e);
   handleRaceGestureMove(e.clientX,e.clientY);
 },true);
@@ -1020,6 +1020,7 @@ document.addEventListener('pointerup',e=>{
 },true);
 document.addEventListener('pointercancel',e=>{if(leftClutchHeld||mouse.l)releaseLeftRaceInput(e);mouse.r=false;rightAccelHeld=false;accelLatchUntil=0;gesture=null;},true);
 document.addEventListener('mousedown',e=>{
+  if(e.target.closest&&e.target.closest('.mobile-race-zone'))return;
   if(!racing||!isInsideStagePoint(e))return;
   mouse.x=e.clientX;mouse.y=e.clientY;
   if(e.button===0){
@@ -1031,6 +1032,7 @@ document.addEventListener('mousedown',e=>{
   if(e.button===2){leftMoveReconstructAllowed=true;rightAccelHeld=true;mouse.r=true;latchAccel(520);e.preventDefault();}
 },true);
 document.addEventListener('mousemove',e=>{
+  if(e.target.closest&&e.target.closest('.mobile-race-zone'))return;
   if(!racing||!isInsideStagePoint(e))return;
   syncMouseButtons(e);
   handleRaceGestureMove(e.clientX,e.clientY);
@@ -1090,11 +1092,13 @@ function bindMobileRaceZone(id,key){
   const move=e=>{
     if(!feedback)return;
     feedback.style.left=e.clientX+'px';feedback.style.top=e.clientY+'px';
+    if(key==='accel')latchAccel(320);
     if(key==='clutch'){const p=inputPoint(e);handleRaceGestureMove(p.x,p.y);}
   };
   el.addEventListener('pointerdown',e=>{
     if(pointerId!==null)return;
-    pointerId=e.pointerId;padInput[key]=true;e.preventDefault();
+    pointerId=e.pointerId;padInput[key]=true;e.preventDefault();e.stopPropagation();
+    if(key==='accel'){rightAccelHeld=true;mouse.r=true;latchAccel(1000);}
     try{el.setPointerCapture(pointerId);}catch{}
     feedback=document.createElement('div');feedback.className='mobile-touch-feedback '+key;
     document.getElementById('mobile-race-input').appendChild(feedback);
@@ -1105,7 +1109,8 @@ function bindMobileRaceZone(id,key){
   el.addEventListener('pointermove',e=>{if(e.pointerId===pointerId)move(e);});
   const release=e=>{
     if(pointerId===null||e.pointerId!==pointerId)return;
-    padInput[key]=false;pointerId=null;e.preventDefault();
+    padInput[key]=false;pointerId=null;e.preventDefault();e.stopPropagation();
+    if(key==='accel'){rightAccelHeld=false;mouse.r=false;accelLatchUntil=0;}
     if(feedback){feedback.remove();feedback=null;}
     if(key==='clutch'){
       gesture=null;
