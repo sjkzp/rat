@@ -177,10 +177,10 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
   #race-controls #pad-clutch.active,#race-controls #pad-accel.active{background:transparent;}
   .touch-feedback{position:absolute;width:60px;height:60px;border:2px solid rgba(255,255,255,.78);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);animation:touch-feedback-in .18s ease-out both;}
   .touch-feedback.clutch{background:rgba(80,130,210,.18);box-shadow:0 0 14px rgba(80,130,210,.4);}
-  .touch-feedback.accel{background:rgba(40,190,100,.18);box-shadow:0 0 14px rgba(40,190,100,.4);}
+  .touch-feedback.accel{width:180px;height:180px;background:rgba(40,190,100,.18);box-shadow:0 0 22px rgba(40,190,100,.4);}
   @keyframes touch-feedback-in{from{opacity:0;transform:translate(-50%,-50%) scale(.65)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-  #TimeDisplay{top:417px!important;}
-  #DistanceDisplay{top:473px!important;}
+  #TimeDisplay{top:442px!important;}
+  #DistanceDisplay{top:498px!important;}
 
   #saves-close{top:458px;width:180px;height:34px;left:390px;font-size:16px;}
   #opts-close{top:468px;width:180px;height:34px;left:390px;font-size:16px;}
