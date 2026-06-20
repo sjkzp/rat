@@ -166,7 +166,7 @@ function playBGM(buf){
   bgmNode.connect(bgmGain); bgmNode.start();
 }
 function playSFX(buf){if(!buf)return;const n=audioCtx.createBufferSource();n.buffer=buf;n.connect(sfxGain);n.start();}
-let engNode=null,engBuf=null,engPitch=1;
+let engNode=null,engBuf=null,defaultEngBuf=null,engPitch=1;
 function startEngine(){
   if(!engBuf||engNode)return;
   engNode=audioCtx.createBufferSource(); engNode.buffer=engBuf; engNode.loop=true;
@@ -331,7 +331,7 @@ function skipType(){
 
 // ── パネル ──────────────────────────────────────────────────
 const panelsEl=document.getElementById('panels');
-let panelBtns=[];
+let panelBtns=[],panelRecords=[];
 
 function addPanel(label,a1,sub,a2,bg,w,h,sel,noBorder,cx,cy,cb){
   const PW=w>0?w*960:192, PH=h>0?h*540:32;
@@ -375,7 +375,7 @@ function activePanelBtns(){
   panelBtns=panelBtns.filter(b=>b&&b.isConnected);
   return panelBtns;
 }
-function clearPanels(){panelsEl.innerHTML='';panelBtns=[];focusedBtn=-1;}
+function clearPanels(){panelsEl.innerHTML='';panelBtns=[];panelRecords=[];focusedBtn=-1;}
 
 // ── ポートレート DOM ────────────────────────────────────────
 const portraitsEl=document.getElementById('portraits');
@@ -432,8 +432,10 @@ function drawRacerFrame(id,driving,frame){
 }
 
 let sceneDriveToken=0;
-async function playSceneDriveSound(seconds,token){
-  if(!engBuf||racing)return;
+async function playSceneDriveSound(racer,seconds,token){
+  if(racing)return;
+  engBuf=(racer&&racer.engineBuf)||defaultEngBuf||engBuf;
+  if(!engBuf)return;
   startEngine();setEngPitch(1.05);
   engGain.gain.cancelScheduledValues(audioCtx.currentTime);
   engGain.gain.value=sfxVol;
@@ -446,7 +448,7 @@ async function playSceneDriveSound(seconds,token){
 async function moveRacerScene(id,tx,ty,seconds){
   const s=racerState[id];if(!s)return;
   const token=++sceneDriveToken;
-  if(drivenRacers.has(id))playSceneDriveSound(seconds,token);
+  if(drivenRacers.has(id))playSceneDriveSound(s.racer,seconds,token);
   const fl=parseFloat(s.cnv.style.left)||0,fb=parseFloat(s.cnv.style.bottom)||0;
   await anim(seconds*1000,p=>{
     s.cnv.style.left=LERP(fl,(tx*960-s.dw/2),p)+'px';
@@ -678,6 +680,7 @@ async function execCmd(line){
       const bg=A(a,7), w=F(A(a,8),.2), h=F(A(a,9),0);
       const PH=h>0?h*540:32;
       const cx=penX, cy=penY;
+      panelRecords.push({rawSel,target,label,a1,sub:sub2,a2,bg,w,h,cx,cy});
       addPanel(label,a1,sub2,a2,bg,w,h,sel,noBorder,cx,cy,()=>{
         clearPanels(); jumpTo(target); run();
       });
@@ -734,10 +737,10 @@ async function execCmd(line){
         wheelSize:.55,finalGear:5,airDrag:1,gearRatios:[2.5,2,1.5,1.25,1,.8]
       };
       applyItems(r);
+      r.engineBuf=await getAudio('racer',r.texId+'_engine','.wav','.ogg','.mp3')||defaultEngBuf;
       racerDefs[r.id]=r;
       if(r.type.toLowerCase()==='player'){
-        const eb=await getAudio('essential','racer_engine','.wav','.ogg','.mp3');
-        if(eb)engBuf=eb;
+        engBuf=r.engineBuf||defaultEngBuf;
         const gb=await getAudio('essential','gearChangeEffect','.wav','.mp3');
         if(gb)gcBuf=gb;
       }
@@ -860,7 +863,7 @@ function raceAccelActive(){return rightAccelHeld||mouse.r||performance.now()<acc
 function raceClutchActive(){return (!mouseClutchForcedOff&&leftClutchHeld)||keys['ShiftLeft']||keys['ShiftRight']||padInput.clutch;}
 function releaseLeftRaceInput(e){
   const rightStillHeld=rightAccelHeld||mouse.r||(typeof e.buttons==='number'&&!!(e.buttons&2));
-  mouseClutchForcedOff=true;leftClutchHeld=false;mouse.l=false;gesture=null;leftReleaseGuardUntil=performance.now()+400;leftMoveReconstructAllowed=false;
+  mouseClutchForcedOff=true;leftClutchHeld=false;mouse.l=false;gesture=null;leftReleaseGuardUntil=performance.now()+90;leftMoveReconstructAllowed=true;
   document.getElementById('clutch-slow-overlay').classList.remove('active');
   if(rightStillHeld){rightAccelHeld=true;mouse.r=true;latchAccel(1000);}
   if(!racing)return;
@@ -896,11 +899,15 @@ stage.addEventListener('mousedown',e=>{
   if(e.button===2){leftMoveReconstructAllowed=true;rightAccelHeld=true;mouse.r=true;latchAccel(520);}
   mouse.x=e.clientX; mouse.y=e.clientY;
   if(e.button===0&&racing){gesture={x:e.clientX,y:e.clientY};gShifted=false;}
-  if(e.button===0&&!racing){suppressNextStoryClickUntil=performance.now()+250;onStoryClick();}
+  if(e.button===0&&!racing){
+    suppressNextStoryClickUntil=performance.now()+250;
+    if(!msgVisible){setMsgVisible(true);return;}
+    onStoryClick();
+  }
 });
 stage.addEventListener('mouseup',reconcileMouseRelease);
 function handleRaceGestureMove(x,y){
-  if(racing&&gesture&&leftClutchHeld){
+  if(racing&&gesture&&raceClutchActive()){
     const dx=x-gesture.x,dy=y-gesture.y;
     if(Math.max(Math.abs(dx),Math.abs(dy))>=60){
       const ps=rStates.find(s=>s.racer.type.toLowerCase()==='player');
@@ -977,11 +984,32 @@ window.addEventListener('blur',()=>{if(leftClutchHeld||mouse.l)releaseLeftRaceIn
 function bindRacePad(id,key){
   const el=document.getElementById(id);
   if(!el)return;
-  const set=(v,e)=>{padInput[key]=v;el.classList.toggle('active',v);if(e)e.preventDefault();};
-  el.addEventListener('pointerdown',e=>set(true,e));
-  el.addEventListener('pointerup',e=>set(false,e));
-  el.addEventListener('pointercancel',e=>set(false,e));
-  el.addEventListener('pointerleave',e=>set(false,e));
+  let pointerId=null;
+  const set=(v,e)=>{padInput[key]=v;el.classList.toggle('active',v);if(e){e.preventDefault();e.stopPropagation();}};
+  el.addEventListener('pointerdown',e=>{
+    if(pointerId!==null)return;
+    pointerId=e.pointerId;set(true,e);
+    try{el.setPointerCapture(pointerId);}catch{}
+    mouse.x=e.clientX;mouse.y=e.clientY;
+    if(key==='clutch'){gesture={x:e.clientX,y:e.clientY};gShifted=false;}
+  });
+  el.addEventListener('pointermove',e=>{
+    if(e.pointerId!==pointerId)return;
+    mouse.x=e.clientX;mouse.y=e.clientY;
+    if(key==='clutch')handleRaceGestureMove(e.clientX,e.clientY);
+  });
+  const release=e=>{
+    if(pointerId===null||e.pointerId!==pointerId)return;
+    set(false,e);pointerId=null;
+    if(key==='clutch'){
+      gesture=null;
+      const st=rStates.find(s=>s.racer.type.toLowerCase()==='player');
+      if(st&&st.clutch){if(st.clutchGear!==st.gear)playSFX(gcBuf);st.clutch=false;}
+    }
+  };
+  el.addEventListener('pointerup',release);
+  el.addEventListener('pointercancel',release);
+  el.addEventListener('lostpointercapture',release);
 }
 bindRacePad('pad-accel','accel');
 bindRacePad('pad-clutch','clutch');
@@ -990,7 +1018,10 @@ document.addEventListener('click',e=>{
   if(performance.now()<suppressNextStoryClickUntil)return;
   if(e.target.closest&&e.target.closest('button,.panel,#util,#title,#opts,#saves'))return;
   const r=stage.getBoundingClientRect();
-  if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom)advanceStory();
+  if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){
+    if(!msgVisible){setMsgVisible(true);suppressNextStoryClickUntil=performance.now()+250;return;}
+    advanceStory();
+  }
 },true);
 
 let focusedBtn=-1;
@@ -1037,7 +1068,7 @@ async function doRace(){
   spriteNums.time&&spriteNums.time.setValue(0);
   spriteNums.dist&&spriteNums.dist.setValue(0);
   spriteNums.speed&&spriteNums.speed.setValue(0);
-  const raceControls=document.getElementById('race-controls'); if(raceControls)raceControls.style.display='none';
+  const raceControls=document.getElementById('race-controls'); if(raceControls)raceControls.classList.add('visible');
   // ポートレート非表示
   portraitsEl.style.display='none';
 
@@ -1086,25 +1117,46 @@ async function doRace(){
       await nextFrame();
     }
   }
-  // フライング後は暗転中に状態を戻し、アクセルを離してから再カウントする。
+  async function showFlyingMotion(){
+    if(!pSt){await waitMs(700);return;}
+    const rs=racerState[pSt.racer.id];
+    const baseLeft=pSt.racer.x*960-(rs?rs.dw/2:0);
+    const begun=performance.now();
+    while(true){
+      const elapsed=performance.now()-begun,progress=CLAMP(elapsed/700,0,1);
+      const eased=1-Math.pow(1-progress,2);
+      pSt.rpm=LERP(pSt.rpm,1,.18);
+      if(rs){
+        rs.cnv.style.left=(baseLeft+eased*135)+'px';
+        const frame=Math.floor(elapsed/Math.max(20,pSt.racer.driveFrameTime*1000))%Math.max(1,pSt.racer.driveF);
+        drawRacerFrame(pSt.racer.id,true,frame);
+      }
+      setEngPitch(1+pSt.rpm*5);
+      if(progress>=1)break;
+      await nextFrame();
+    }
+  }
+  // フライング時は車体を飛び出させ、入力を離してから開始位置で再カウントする。
   while(true){
     let flying=false;
     for(let i=3;i>=1;i--){if(await countdownSignal(i)){flying=true;break;}}
     if(!flying)break;
     if(flyingTex)sig.src=flyingTex;
     sig.style.display='block';sig.style.opacity='1';sig.style.transform='scale(1)';
-    await waitMs(700);
-    await wipeIn('AroundToCenter',.35);
+    await showFlyingMotion();
+    stopEngine();setEngPitch(1);
     if(pSt){
       pSt.speed=0;pSt.distance=0;pSt.rpm=0;pSt.gear=0;pSt.clutch=false;pSt.clutchGear=0;
       updateGearHUD(pSt,gearImg);
+      const rs=racerState[pSt.racer.id];
+      if(rs){rs.cnv.style.left=(pSt.racer.x*960-rs.dw/2)+'px';drawRacerFrame(pSt.racer.id,false,0);}
     }
     leftClutchHeld=false;mouse.l=false;gesture=null;gShifted=false;
     sig.style.display='none';
     while(raceAccelActive())await nextFrame();
     rightAccelHeld=false;mouse.r=false;accelLatchUntil=0;
     await waitMs(200);
-    await wipeOut('AroundToCenter',.35);
+    startEngine();setEngPitch(1);
   }
   const startSig=document.getElementById('hud-signal');
   if(signalTex[0]){startSig.src=signalTex[0];startSig.style.display='block';}
@@ -1197,6 +1249,7 @@ async function doRace(){
     }
   }
   stopEngine(); engGain.gain.value=sfxVol;
+  if(raceControls)raceControls.classList.remove('visible');
 
   // 結果
   let winner=rStates.reduce((a,b)=>(a.finish>=0&&(b.finish<0||a.finish<b.finish))?a:b);
@@ -1207,18 +1260,7 @@ async function doRace(){
   tachoNeedle.style.display='none';
   gearImg.style.display='none';
   const resEl=document.getElementById('hud-result');
-  if(won&&winTex){resEl.src=winTex;resEl.style.display='block';}
-  else if(!won&&loseTex){resEl.src=loseTex;resEl.style.display='block';}
-  if(won){
-    const fl=document.getElementById('hud-flash');
-    fl.style.display='block';fl.style.opacity='1';
-    await anim(250,p=>{fl.style.opacity=1-p;});fl.style.display='none';
-  }
-  await anim(400,p=>{resEl.style.opacity=1-p;});resEl.style.display='none';
-  if(spriteNums.first)spriteNums.first.setValue(winner.finish);
-  if(spriteNums.your)spriteNums.your.setValue(pSt?pSt.finish:winner.finish);
-  setResultNumbersActive(true);
-  await new Promise(res=>{
+  const waitRaceConfirm=()=>new Promise(res=>{
     let done=false;
     const finish=e=>{
       const accepted=e.type==='keydown'?(e.code==='Enter'||e.code==='KeyZ'):e.button===0;
@@ -1234,10 +1276,23 @@ async function doRace(){
     document.addEventListener('mousedown',finish,true);
     document.addEventListener('keydown',finish,true);
   });
+  if(won&&winTex){resEl.src=winTex;resEl.style.display='block';}
+  else if(!won&&loseTex){resEl.src=loseTex;resEl.style.display='block';}
+  if(won){
+    const fl=document.getElementById('hud-flash');
+    fl.style.display='block';fl.style.opacity='1';
+    await anim(250,p=>{fl.style.opacity=1-p;});fl.style.display='none';
+  }
+  await waitMs(350);
+  await anim(400,p=>{resEl.style.opacity=1-p;});resEl.style.display='none';
+  if(spriteNums.first)spriteNums.first.setValue(winner.finish);
+  if(spriteNums.your)spriteNums.your.setValue(pSt?pSt.finish:winner.finish);
+  setResultNumbersActive(true);
+  await waitRaceConfirm();
   setResultNumbersActive(false);
 
   // 後片付け
-  hud.style.display='none'; setSpriteNumbersActive(false); if(raceControls)raceControls.style.display='none';
+  hud.style.display='none'; setSpriteNumbersActive(false); if(raceControls)raceControls.classList.remove('visible');
   padInput.accel=false; padInput.clutch=false;
   clutchSlowOverlay.classList.remove('active');
   if(bgmNode)bgmNode.playbackRate.value=1;
@@ -1269,6 +1324,10 @@ function buildSave(){
   for(const[,r] of Object.entries(racerDefs))L.push(['SetRacer',r.sid,r.idleF,r.idleFrameTime,r.driveF,r.driveFrameTime,r.x,r.y,r.type,r.trans,r.baseSpeed,r.shiftTime].join(','));
   for(const id of drivenRacers)L.push('DriveRacer,'+id);
   for(const[,p] of Object.entries(portraits))L.push('SetPortrait,'+p.pid+','+p.imgName+','+p.x+','+p.y);
+  for(const p of panelRecords){
+    L.push('SetPen,'+p.cx+','+p.cy);
+    L.push(['SetPanel',p.rawSel,p.target,p.label,p.a1,p.sub,p.a2,'',p.bg,p.w,p.h].join(','));
+  }
   if(curText)L.push((curSpeaker||'')+','+(curPid||'')+','+(curText||'').replace(/\n/g,'<br>'));
   L.push('Loaded,'+sceneName+','+Math.max(-1,pc-1));
   return L.join('\n');
@@ -1307,12 +1366,14 @@ async function loadSlot(i){
   }
   if(!lScene)return;
   await openScene(lScene); pc=Math.max(0,lPc+1);
-  running=true;stopped=false;
+  const restoredPanels=panelRecords.length>0;
+  running=true;stopped=restoredPanels;
   document.getElementById('title').style.display='none';
   document.getElementById('saves').style.display='none';
   setMsgVisible(true);
   if(lDlg){curSpeaker=sub(lDlg.speaker);curPid=lDlg.pid;curText=sub(lDlg.text);startType(curSpeaker,curPid,curText);waiting=true;}
-  else{waiting=false;run();}
+  else waiting=false;
+  if(!restoredPanels)run();
 }
 
 function buildSaveScreen(){
@@ -1374,7 +1435,7 @@ async function loadTheme(){
   const rw=await getImg('essential','race_end_win','.png'); if(rw)winTex=rw.src;
   const rl=await getImg('essential','race_end_lose','.png'); if(rl)loseTex=removeWhiteBackground(rl);
   // エンジン音
-  const eb=await getAudio('essential','racer_engine','.wav','.ogg'); if(eb)engBuf=eb;
+  const eb=await getAudio('essential','racer_engine','.wav','.ogg'); if(eb){defaultEngBuf=eb;engBuf=eb;}
   const gb=await getAudio('essential','gearChangeEffect','.wav'); if(gb)gcBuf=gb;
 }
 function removeWhiteBackground(img){
@@ -1464,8 +1525,8 @@ document.getElementById('t-cont').addEventListener('click',()=>{buildSaveScreen(
 document.getElementById('t-opts').addEventListener('click',()=>document.getElementById('opts').style.display='block');
 document.getElementById('u-save').addEventListener('click',()=>{buildSaveScreen();document.getElementById('saves').style.display='block';});
 document.getElementById('u-opts').addEventListener('click',()=>document.getElementById('opts').style.display='block');
-document.getElementById('u-hide').addEventListener('click',()=>setMsgVisible(false));
-stage.addEventListener('click',e=>{if(!msgVisible&&e.button===0)setMsgVisible(true);});
+function hideMessageUi(e){if(e){e.preventDefault();e.stopPropagation();}setMsgVisible(false);}
+document.getElementById('u-hide').addEventListener('click',hideMessageUi);
 document.getElementById('opts-close').addEventListener('click',()=>document.getElementById('opts').style.display='none');
 
 // オプションスライダー
@@ -1500,7 +1561,7 @@ function bindRepairedUi(){
   const hideBtn=document.getElementById('u-hide');
   if(saveBtn)saveBtn.onclick=()=>{buildSaveScreen();saves.style.display='block';};
   if(optsBtn)optsBtn.onclick=()=>{opts.style.display='block';};
-  if(hideBtn)hideBtn.onclick=()=>setMsgVisible(false);
+  if(hideBtn)hideBtn.onclick=hideMessageUi;
 }
 bindRepairedUi();
 requestAnimationFrame(loop);

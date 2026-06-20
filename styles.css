@@ -23,9 +23,7 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 .panel-left{flex:1;padding:0 8px;color:#fff;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .panel-right{flex:1;padding:0 8px;color:#fff;font-size:15px;text-align:right;white-space:nowrap;overflow:hidden;}
 .panel.sel{cursor:pointer;border:1px solid rgba(97,114,140,.9);outline:none;}
-.panel.sel:hover,.panel.sel.focus{z-index:1;border-color:#fff;filter:brightness(1.25) contrast(1.06);box-shadow:inset 5px 0 #fff,inset 0 0 0 1px #fff,0 0 8px rgba(255,255,255,.5);}
-.panel.sel:hover .panel-left,.panel.sel:hover .panel-right,.panel.sel.focus .panel-left,.panel.sel.focus .panel-right{font-weight:bold;text-shadow:0 1px 2px #000;}
-#panels:has(.panel.sel.focus) .panel.sel:not(.focus):not(:hover){filter:brightness(.72);opacity:.82;}
+.panel.sel:hover,.panel.sel.focus{z-index:1;background:#666!important;border:none!important;filter:none;box-shadow:none;}
 
 /* ── メッセージ ──────────────────────── */
 #msgwrap{position:absolute;left:0;bottom:-20px;width:960px;height:169px;z-index:8;pointer-events:none;
@@ -62,8 +60,8 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 #opts-close{position:absolute;left:400px;top:498px;width:160px;height:29px;background:#787878;color:#fff;border:none;font-size:16px;cursor:pointer;font-family:inherit;}
 #opts-close:hover{background:#999;}
 #opts-controls{position:absolute;left:56px;top:240px;color:#fff;font-size:14px;line-height:1.9;}
-#o-clutch-slow{position:absolute;left:71px;top:343px;width:18px;height:18px;accent-color:#eee;cursor:pointer;}
-#o-clutch-slow-label{position:absolute;left:96px;top:338px;height:28px;display:flex;align-items:center;color:#fff;font-size:16px;cursor:pointer;}
+#o-clutch-slow{position:absolute;left:71px;top:372px;width:18px;height:18px;accent-color:#eee;cursor:pointer;}
+#o-clutch-slow-label{position:absolute;left:96px;top:367px;height:28px;display:flex;align-items:center;color:#fff;font-size:16px;cursor:pointer;}
 
 /* ── セーブ ──────────────────────────── */
 #saves{display:none;position:absolute;top:0;left:0;width:960px;height:540px;z-index:50;background:#4b4b4b;}
@@ -156,3 +154,12 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 #hud-time,#hud-dist,#hud-speed{visibility:hidden!important;}
 .sprite-numbers{position:absolute;z-index:2;pointer-events:none;transform-origin:center center;}
 .sprite-numbers canvas{position:absolute;image-rendering:pixelated;pointer-events:none;}
+
+@media (pointer:coarse){
+  #race-controls.visible{display:block!important;position:absolute;inset:0;height:auto;z-index:120;pointer-events:none;}
+  #race-controls .race-pad{top:0;bottom:0;width:50%;height:100%;border:0;border-radius:0;background:transparent;box-shadow:none;color:transparent;opacity:1;transform:none;touch-action:none;}
+  #race-controls #pad-clutch{left:0;right:auto;}
+  #race-controls #pad-accel{left:auto;right:0;}
+  #race-controls #pad-clutch.active{background:rgba(80,130,210,.10);}
+  #race-controls #pad-accel.active{background:rgba(40,190,100,.10);}
+}
