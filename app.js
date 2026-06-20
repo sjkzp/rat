@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.20.1';
+const RAT_BROWSER_VERSION='2026.06.20.2';
 
 function initStartupSplash(){
   const splash=document.getElementById('startup-splash');
