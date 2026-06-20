@@ -1490,6 +1490,7 @@ function resetAll(){
 }
 
 async function startGame(){
+  requestMobileFullscreen();
   audioCtx.resume();
   resetAll(); running=true;
   closeWipeImmediately();
@@ -1498,6 +1499,13 @@ async function startGame(){
   try{await readText('scene/_entrypoint.txt');entry='_entrypoint';}catch{}
   await openScene(entry);
   run();
+}
+
+function requestMobileFullscreen(){
+  if(!matchMedia('(pointer:coarse)').matches||matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches)return;
+  const root=document.documentElement;
+  if(root.requestFullscreen)root.requestFullscreen({navigationUI:'hide'}).catch(()=>{});
+  else if(root.webkitRequestFullscreen)try{root.webkitRequestFullscreen();}catch{}
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1575,6 +1583,7 @@ function ensureZipLoader(){
   document.head.appendChild(s);
 }
 ensureZipLoader();
+if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
 function bindRepairedUi(){
   const saves=document.getElementById('saves');
   const opts=document.getElementById('opts');
