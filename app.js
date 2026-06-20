@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.20.5';
+const RAT_BROWSER_VERSION='2026.06.20.6';
 
 function initStartupSplash(){
   const splash=document.getElementById('startup-splash');
@@ -1248,15 +1248,15 @@ async function doRace(){
       if(st.distance>=raceSetup.dist&&st.finish<0)st.finish=elapsed;
     }
     // HUD更新
-    const el=elapsed; const ref=pSt||rStates[0];
-    tEl.textContent=el.toFixed(2)+'sec';
+    const hudElapsed=pSt&&pSt.finish>=0?pSt.finish:elapsed; const ref=pSt||rStates[0];
+    tEl.textContent=hudElapsed.toFixed(2)+'sec';
     dEl.textContent=Math.max(0,raceSetup.dist-ref.distance).toFixed(1)+'m';
     sEl.textContent=(ref.speed*3.6).toFixed(1)+'km/h';
-    if(spriteNums.time)spriteNums.time.setValue(el);
+    if(spriteNums.time)spriteNums.time.setValue(hudElapsed);
     if(spriteNums.dist)spriteNums.dist.setValue(Math.max(0,raceSetup.dist-ref.distance));
     if(spriteNums.speed)spriteNums.speed.setValue(ref.speed*3.6);
     if(enemy){
-      et.textContent=fmtT(enemy.finish>=0?enemy.finish:el)+'  '+Math.floor(enemy.speed*3.6)+' km/h';
+      et.textContent=fmtT(enemy.finish>=0?enemy.finish:elapsed)+'  '+Math.floor(enemy.speed*3.6)+' km/h';
       const gapM=ref.distance-enemy.distance;
       gap.textContent=(gapM>.5?'+ ':gapM<-.5?'- ':'± ')+Math.abs(Math.round(gapM))+' m';
       gap.style.color=gapM<0?'#f44':'#fff';
