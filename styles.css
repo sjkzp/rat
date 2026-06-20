@@ -106,6 +106,7 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 #hud-signal{position:absolute;top:0;left:0;display:none;width:960px;height:540px;max-width:none;object-fit:contain;}
 #hud-result{position:absolute;top:0;left:0;display:none;width:960px;height:540px;max-width:none;object-fit:contain;z-index:101;}
 #hud-flash{position:absolute;inset:0;width:960px;height:540px;background:#fff;display:none;pointer-events:none;z-index:100;}
+#hud.race-finished #hud-tacho,#hud.race-finished #hud-needle-tacho,#hud.race-finished #hud-gear{display:none!important;}
 #hud-time1{position:absolute;top:50%;left:50%;transform:translate(-50%,-60px);color:#fff;font-size:28px;text-shadow:2px -2px #000;display:none;text-align:center;white-space:nowrap;}
 #hud-time2{position:absolute;top:50%;left:50%;transform:translate(-50%,20px);color:#fff;font-size:28px;text-shadow:2px -2px #000;display:none;text-align:center;white-space:nowrap;}
 #race-controls{position:absolute;left:0;right:0;bottom:18px;height:118px;display:none;pointer-events:none;}

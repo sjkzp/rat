@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.20.8';
+const RAT_BROWSER_VERSION='2026.06.20.9';
 
 function initStartupSplash(){
   const splash=document.getElementById('startup-splash');
@@ -1112,7 +1112,7 @@ async function doRace(){
   racing=true; forceHideUi=true; setMsgVisible(false); animMsg(1);
   mouseClutchForcedOff=false;
   racersEl.style.display='';
-  const hud=document.getElementById('hud'); hud.style.display='block';
+  const hud=document.getElementById('hud'); hud.classList.remove('race-finished');hud.style.display='block';
   initSpriteNumbers();
   setSpriteNumbersActive(true);
   spriteNums.time&&spriteNums.time.setValue(0);
@@ -1304,6 +1304,7 @@ async function doRace(){
   let winner=rStates.reduce((a,b)=>(a.finish>=0&&(b.finish<0||a.finish<b.finish))?a:b);
   const won=pSt===null||winner===pSt;
   racersEl.style.display='none';
+  hud.classList.add('race-finished');
   setRaceNumbersActive(false);
   tachoImg2.style.display='none';
   tachoNeedle.style.display='none';
@@ -1325,8 +1326,12 @@ async function doRace(){
     document.addEventListener('mousedown',finish,true);
     document.addEventListener('keydown',finish,true);
   });
-  if(won&&winTex){resEl.src=winTex;resEl.style.display='block';}
-  else if(!won&&loseTex){resEl.src=loseTex;resEl.style.display='block';}
+  const resultSrc=won?winTex:loseTex;
+  if(resultSrc){
+    resEl.src=resultSrc;
+    try{await resEl.decode();}catch{}
+    resEl.style.opacity='1';resEl.style.transform='scale(1)';resEl.style.display='block';
+  }
   if(won){
     const fl=document.getElementById('hud-flash');
     fl.style.display='block';fl.style.opacity='1';
@@ -1551,14 +1556,21 @@ function requestMobileFullscreen(){
 const statusEl=document.getElementById('title-status');
 const loadingProgress=document.getElementById('loading-progress');
 const newBtn=document.getElementById('t-new');
+const continueBtn=document.getElementById('t-cont');
+const titleOptionBtn=document.getElementById('t-opts');
+
+function setTitleLoading(value){
+  newBtn.disabled=value;continueBtn.disabled=value;titleOptionBtn.disabled=value;
+}
 
 async function modsOK(){
+  setTitleLoading(true);
   statusEl.textContent='Now Loading...';
   loadingProgress.classList.add('active');
   try{
     await loadTheme();
     statusEl.textContent='';
-    newBtn.disabled=false;
+    setTitleLoading(false);
   }finally{
     loadingProgress.classList.remove('active');
   }
