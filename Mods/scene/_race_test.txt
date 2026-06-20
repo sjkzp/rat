@@ -1,9 +1,0 @@
-SetBackground,race_sky_night
-SetRaceBackground,race_road,race_city
-SetRacer,EVR_TYPE_S,1,1.0,3,0.06,0.20,0.60,Standard,MotorCycle5,2.7,0.4
-SetRacer,Pizza,1,1.0,3,0.06,0.20,0.45,Player,MotorCycle5,2.5,0
-RaceSetup,2000,#done,#done
-WipeOut,AroundToCenter
-RaceStart
-#done
-Stop
