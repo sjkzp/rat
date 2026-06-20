@@ -1487,13 +1487,19 @@ async function startGame(){
 //  Mods 読み込み
 // ═══════════════════════════════════════════════════════════════════
 const statusEl=document.getElementById('title-status');
+const loadingProgress=document.getElementById('loading-progress');
 const newBtn=document.getElementById('t-new');
 
 async function modsOK(){
   statusEl.textContent='Now Loading...';
-  await loadTheme();
-  statusEl.textContent='';
-  newBtn.disabled=false;
+  loadingProgress.classList.add('active');
+  try{
+    await loadTheme();
+    statusEl.textContent='';
+    newBtn.disabled=false;
+  }finally{
+    loadingProgress.classList.remove('active');
+  }
 }
 async function initMods(){
   statusEl.textContent='Mods/ を確認中...';
