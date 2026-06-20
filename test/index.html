@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RAT">
+<title>RAT</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="wrap">
+<div id="stage">
+  <div id="startup-splash">
+    <div id="startup-logo-crop"><img src="Mods/essential/rat_logo.png" alt="RAT"></div>
+    <div id="startup-version"></div>
+  </div>
+  <canvas id="c-bg"  width="960" height="540"></canvas>
+  <canvas id="c-far" width="960" height="540"></canvas>
+  <canvas id="c-near"width="960" height="540"></canvas>
+  <canvas id="c-eff" width="960" height="540"></canvas>
+  <div id="portraits"></div>
+  <div id="racers"></div>
+  <div id="panels"></div>
+  <div id="hud">
+    <div id="hud-enemy-name"></div>
+    <div id="hud-enemy-tel"></div>
+    <div id="hud-player-name"></div>
+    <div id="hud-gap"></div>
+    <div id="hud-trackbar"><div id="hud-needle"></div></div>
+    <div id="hud-time"></div>
+    <div id="hud-dist"></div>
+    <div id="hud-speed"></div>
+    <img id="hud-tacho" src="" style="display:none">
+    <img id="hud-needle-tacho" src="" style="display:none">
+    <img id="hud-gear" src="" style="display:none">
+    <img id="hud-signal">
+    <img id="hud-result">
+    <div id="hud-flash"></div>
+    <div id="hud-time1"></div>
+    <div id="hud-time2"></div>
+    <div id="race-controls">
+      <div class="race-pad" id="pad-clutch">CLUTCH</div>
+      <div class="race-pad" id="pad-accel">ACCEL</div>
+    </div>
+  </div>
+  <div id="msgwrap"></div>
+  <div id="msgbox">
+    <div id="speaker"></div>
+    <div id="message"></div>
+  </div>
+  <div id="util">
+    <button class="ubtn" id="u-save" title="セーブ/ロード">💾</button>
+    <button class="ubtn" id="u-opts" title="オプション">⚙</button>
+    <button class="ubtn" id="u-hide" title="メッセージ非表示">✕</button>
+  </div>
+  <div id="clutch-slow-overlay"></div>
+  <canvas id="wipe" width="960" height="540"></canvas>
+  <!-- タイトル -->
+  <div id="title">
+    <img id="title-bg" src="" alt="">
+    <div id="title-btns">
+      <button class="tbtn" id="t-new"  disabled>New Game</button>
+      <button class="tbtn" id="t-cont" disabled>Continue</button>
+      <button class="tbtn" id="t-opts" disabled>Option</button>
+    </div>
+    <div id="loading-progress"><span></span></div>
+    <div id="title-status">読み込み中...</div>
+  </div>
+  <!-- オプション -->
+  <div id="opts">
+    <span class="opt-lbl" style="left:56px;top:54px">文章ウェイト</span>
+    <input class="opt-sl" id="o-speed" type="range" min="0" max="1" step="0.01" style="left:220px;top:62px;width:240px">
+    <span class="opt-lbl" style="left:56px;top:104px">BGM音量</span>
+    <input class="opt-sl" id="o-bgm"   type="range" min="0" max="1" step="0.01" style="left:220px;top:112px;width:240px">
+    <span class="opt-lbl" style="left:56px;top:154px">効果音</span>
+    <input class="opt-sl" id="o-sfx"   type="range" min="0" max="1" step="0.01" style="left:220px;top:162px;width:240px">
+    <div id="opts-controls">操作方法：<br>PC　アクセル：右クリック / Zキー<br>PC　クラッチ：左クリック / Shiftキー<br>PC　シフト：クラッチ中に矢印キー / マウスジェスチャー<br>スマホ　画面左半分：クラッチ / スワイプでシフト<br>スマホ　画面右半分：アクセル</div>
+    <input id="o-clutch-slow" type="checkbox">
+    <label id="o-clutch-slow-label" for="o-clutch-slow">クラッチ操作のとき時間の進みを遅くする</label>
+    <button id="opts-close">Close</button>
+  </div>
+  <!-- セーブ -->
+  <div id="saves"></div>
+</div><!-- #stage -->
+</div><!-- #wrap -->
+
+<script src="app.js"></script>
+</body>
+</html>
