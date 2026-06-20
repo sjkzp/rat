@@ -18,7 +18,7 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 #c-bg   {z-index:1;}
 #c-far  {z-index:2;}
 #c-near {z-index:3;}
-#c-eff  {z-index:4;}
+#c-eff  {z-index:6;}
 
 /* ── ポートレート・レーサー ───────────── */
 #portraits,#racers{position:absolute;top:0;left:0;width:960px;height:540px;z-index:5;pointer-events:none;}
@@ -174,8 +174,11 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
   #race-controls .race-pad{top:0;bottom:0;width:50%;height:100%;border:0;border-radius:0;background:transparent;box-shadow:none;color:transparent;opacity:1;transform:none;touch-action:none;}
   #race-controls #pad-clutch{left:0;right:auto;}
   #race-controls #pad-accel{left:auto;right:0;}
-  #race-controls #pad-clutch.active{background:rgba(80,130,210,.10);}
-  #race-controls #pad-accel.active{background:rgba(40,190,100,.10);}
+  #race-controls #pad-clutch.active,#race-controls #pad-accel.active{background:transparent;}
+  .touch-feedback{position:absolute;width:60px;height:60px;border:2px solid rgba(255,255,255,.78);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);animation:touch-feedback-in .18s ease-out both;}
+  .touch-feedback.clutch{background:rgba(80,130,210,.18);box-shadow:0 0 14px rgba(80,130,210,.4);}
+  .touch-feedback.accel{background:rgba(40,190,100,.18);box-shadow:0 0 14px rgba(40,190,100,.4);}
+  @keyframes touch-feedback-in{from{opacity:0;transform:translate(-50%,-50%) scale(.65)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
   #TimeDisplay{top:417px!important;}
   #DistanceDisplay{top:473px!important;}
 

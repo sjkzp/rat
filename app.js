@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.20.3';
+const RAT_BROWSER_VERSION='2026.06.20.5';
 
 function initStartupSplash(){
   const splash=document.getElementById('startup-splash');
@@ -186,7 +186,7 @@ function startEngine(){
 }
 function stopEngine(){if(engNode){try{engNode.stop();}catch{}engNode=null;}}
 function setEngPitch(v){engPitch=v;if(engNode)engNode.playbackRate.value=v;}
-let gcBuf=null; // gear change SFX
+let gcBuf=null,shiftBuf=null; // gear change SFX
 
 // ── Canvas ──────────────────────────────────────────────────
 const cBg  =document.getElementById('c-bg').getContext('2d');
@@ -225,7 +225,7 @@ let racing=false;
 const gearTex={}, signalTex={}, signalSfx={};
 let tachoSrc='',needleSrc='',gearSrc='';
 let winTex='',loseTex='',flyingTex='';
-let numbersImg=null;
+let numbersImg=null,gearEffectImg=null;
 
 class SpriteNumbers{
   constructor(parent,name,position,size,scale,suffix,hasDecimal,hasHundredth,custom=null){
@@ -441,6 +441,31 @@ function drawRacerFrame(id,driving,frame){
   const ctx=cnv.getContext('2d');
   ctx.clearRect(0,0,fw,fh);
   ctx.drawImage(img,driving?fw:0,fi*fh,fw,fh,0,0,fw,fh);
+}
+
+function playShiftEffect(st){
+  playSFX(gcBuf);playSFX(shiftBuf);
+  const rs=st&&racerState[st.racer.id];
+  if(!gearEffectImg||!rs)return;
+  for(let i=0;i<6;i++){
+    const c=document.createElement('canvas');c.width=256;c.height=256;
+    c.style.cssText='position:absolute;top:auto;width:64px;height:64px;pointer-events:none;z-index:2;transform-origin:center;';
+    racersEl.appendChild(c);
+    const randomX=(Math.random()*2-1)*28,randomY=(Math.random()*2-1)*28;
+    const angle=Math.random()*360,maxScale=.8+Math.random()*2.2,start=performance.now();
+    const tick=now=>{
+      const elapsed=(now-start)/1000,cell=Math.floor(elapsed/.066);
+      if(cell>=6||!c.isConnected){c.remove();return;}
+      const ctx=c.getContext('2d');ctx.clearRect(0,0,256,256);
+      ctx.drawImage(gearEffectImg,0,gearEffectImg.naturalHeight-(cell+1)*256,256,256,0,0,256,256);
+      const left=(parseFloat(rs.cnv.style.left)||0)+rs.dw/2-32+randomX-st.speed*elapsed*18;
+      const bottom=(parseFloat(rs.cnv.style.bottom)||0)+rs.dh/2-32+randomY;
+      const scale=1+Math.pow(elapsed/(.066*6),2)*maxScale;
+      c.style.left=left+'px';c.style.bottom=bottom+'px';c.style.transform=`rotate(${angle}deg) scale(${scale})`;
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
 }
 
 let sceneDriveToken=0;
@@ -884,8 +909,8 @@ function releaseLeftRaceInput(e){
   if(rightStillHeld){rightAccelHeld=true;mouse.r=true;latchAccel(1000);}
   if(!racing)return;
   const st=rStates.find(s=>s.racer.type.toLowerCase()==='player');
-  if(st&&st.clutch){
-    if(st.clutchGear!==st.gear)playSFX(gcBuf);
+  if(st){
+    if(st.clutchGear!==st.gear){playShiftEffect(st);st.clutchGear=st.gear;}
     st.clutch=false;
     const gearImg=document.getElementById('hud-gear');
     if(gearImg)updateGearHUD(st,gearImg);
@@ -1000,27 +1025,36 @@ window.addEventListener('blur',()=>{if(leftClutchHeld||mouse.l)releaseLeftRaceIn
 function bindRacePad(id,key){
   const el=document.getElementById(id);
   if(!el)return;
-  let pointerId=null;
+  let pointerId=null,feedback=null;
+  const placeFeedback=e=>{
+    if(!feedback)return;
+    const r=document.getElementById('race-controls').getBoundingClientRect();
+    feedback.style.left=((e.clientX-r.left)/r.width*960)+'px';
+    feedback.style.top=((e.clientY-r.top)/r.height*540)+'px';
+  };
   const set=(v,e)=>{padInput[key]=v;el.classList.toggle('active',v);if(e){e.preventDefault();e.stopPropagation();}};
   el.addEventListener('pointerdown',e=>{
     if(pointerId!==null)return;
     pointerId=e.pointerId;set(true,e);
     try{el.setPointerCapture(pointerId);}catch{}
+    feedback=document.createElement('div');feedback.className='touch-feedback '+key;
+    document.getElementById('race-controls').appendChild(feedback);placeFeedback(e);
     mouse.x=e.clientX;mouse.y=e.clientY;
     if(key==='clutch'){gesture={x:e.clientX,y:e.clientY};gShifted=false;}
   });
   el.addEventListener('pointermove',e=>{
     if(e.pointerId!==pointerId)return;
+    placeFeedback(e);
     mouse.x=e.clientX;mouse.y=e.clientY;
     if(key==='clutch')handleRaceGestureMove(e.clientX,e.clientY);
   });
   const release=e=>{
     if(pointerId===null||e.pointerId!==pointerId)return;
-    set(false,e);pointerId=null;
+    set(false,e);pointerId=null;if(feedback){feedback.remove();feedback=null;}
     if(key==='clutch'){
       gesture=null;
       const st=rStates.find(s=>s.racer.type.toLowerCase()==='player');
-      if(st&&st.clutch){if(st.clutchGear!==st.gear)playSFX(gcBuf);st.clutch=false;}
+      if(st){if(st.clutchGear!==st.gear){playShiftEffect(st);st.clutchGear=st.gear;}st.clutch=false;}
     }
   };
   el.addEventListener('pointerup',release);
@@ -1112,7 +1146,7 @@ async function doRace(){
     if(!pSt)return;
     const cl=raceClutchActive();
     if(cl&&!pSt.clutch){pSt.clutchGear=pSt.gear;gShifted=false;}
-    if(!cl&&pSt.clutch&&pSt.clutchGear!==pSt.gear)playSFX(gcBuf);
+    if(!cl&&pSt.clutch&&pSt.clutchGear!==pSt.gear)playShiftEffect(pSt);
     pSt.clutch=cl;
     updateGearHUD(pSt,gearImg);
   }
@@ -1200,7 +1234,7 @@ async function doRace(){
       if(isP){
         const cl=raceClutchActive();
         if(cl&&!st.clutch){st.clutchGear=st.gear;gesture&&(gesture={x:mouse.x,y:mouse.y});gShifted=false;}
-        if(!cl&&st.clutch&&st.clutchGear!==st.gear)playSFX(gcBuf);
+        if(!cl&&st.clutch&&st.clutchGear!==st.gear)playShiftEffect(st);
         st.clutch=cl;
         updateGearHUD(st,gearImg);
       } else {
@@ -1447,12 +1481,14 @@ async function loadTheme(){
     const sb=await getAudio('essential','race_starting_'+i+'_sound','.wav','.ogg'); if(sb)signalSfx[i]=sb;
   }
   const fly=await getImg('essential','race_flying','.png'); if(fly)flyingTex=fly.src;
+  const ge=await getImg('essential','gear_effect','.png'); if(ge)gearEffectImg=ge;
   // レース結果
   const rw=await getImg('essential','race_end_win','.png'); if(rw)winTex=rw.src;
   const rl=await getImg('essential','race_end_lose','.png'); if(rl)loseTex=removeWhiteBackground(rl);
   // エンジン音
   const eb=await getAudio('essential','racer_engine','.wav','.ogg'); if(eb){defaultEngBuf=eb;engBuf=eb;}
   const gb=await getAudio('essential','gearChangeEffect','.wav'); if(gb)gcBuf=gb;
+  const sb=await getAudio('essential','racer_shift','.wav','.ogg','.mp3'); if(sb)shiftBuf=sb;
 }
 function removeWhiteBackground(img){
   const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;
