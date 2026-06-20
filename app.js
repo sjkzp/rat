@@ -1490,7 +1490,7 @@ const statusEl=document.getElementById('title-status');
 const newBtn=document.getElementById('t-new');
 
 async function modsOK(){
-  statusEl.textContent='テーマを読み込み中...';
+  statusEl.textContent='Now Loading...';
   await loadTheme();
   statusEl.textContent='';
   newBtn.disabled=false;
