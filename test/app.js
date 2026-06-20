@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.mobile.20';
+const RAT_BROWSER_VERSION='2026.06.21.22';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -401,7 +401,10 @@ function activePanelBtns(){
   panelBtns=panelBtns.filter(b=>b&&b.isConnected);
   return panelBtns;
 }
-function clearPanels(){panelsEl.innerHTML='';panelBtns=[];panelRecords=[];focusedBtn=-1;}
+function clearPanels(){
+  if(document.activeElement&&document.activeElement.classList?.contains('panel'))document.activeElement.blur();
+  panelsEl.innerHTML='';panelBtns=[];panelRecords=[];focusedBtn=-1;
+}
 
 // ── ポートレート DOM ────────────────────────────────────────
 const portraitsEl=document.getElementById('portraits');
