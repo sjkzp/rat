@@ -209,7 +209,7 @@ body.mobile-build button,body.mobile-build input{touch-action:manipulation;}
 body.mobile-build #title-btns{right:64px;top:300px;gap:10px;}
 body.mobile-build .tbtn{
   width:330px;height:50px;font-size:19px;font-weight:700;
-  background:rgba(244,246,248,.94);border-left:5px solid #51d47a;
+  background:rgba(244,246,248,.94);
   box-shadow:0 6px 18px rgba(0,0,0,.3);
 }
 body.mobile-build .tbtn:active{transform:translateY(2px);filter:brightness(.9);}
@@ -220,16 +220,15 @@ body.mobile-build .ubtn{width:46px;height:46px;}
 body.mobile-build .ubtn img{width:30px;height:30px;opacity:.9;}
 
 body.mobile-build .panel.sel{
-  font-size:18px;border-left:5px solid #51d47a!important;
+  font-size:18px;
   box-shadow:0 4px 12px rgba(0,0,0,.28);touch-action:manipulation;
 }
 body.mobile-build .panel.sel:active{filter:brightness(1.25);transform:scale(.99);}
-body.mobile-build .panel-left,body.mobile-build .panel-right{font-size:17px;padding:0 12px;}
+body.mobile-build .panel-left,body.mobile-build .panel-right{font-size:21px;font-weight:600;padding:0 12px;}
 
 body.mobile-build #opts{background:#20252b;}
 body.mobile-build #opts::before{
   content:"OPTION";position:absolute;left:70px;top:25px;color:#fff;font:700 24px Arial,sans-serif;
-  border-left:5px solid #51d47a;padding-left:12px;
 }
 body.mobile-build #opts .opt-lbl{left:90px!important;font-size:19px;}
 body.mobile-build #opts .opt-lbl:nth-of-type(1){top:88px!important;}
@@ -253,7 +252,7 @@ body.mobile-build .saves-heading{
   position:sticky;top:0;height:64px;padding:24px 0 0 70px;z-index:3;background:#20252b;
   color:#fff;font:700 24px Arial,sans-serif;border-bottom:1px solid rgba(255,255,255,.1);
 }
-body.mobile-build .saves-heading::before{content:"";position:absolute;left:52px;top:22px;width:5px;height:29px;background:#51d47a;}
+body.mobile-build .saves-heading::before{display:none;}
 body.mobile-build .save-list{position:relative;width:960px;height:692px;}
 body.mobile-build .slot-box{border:1px solid rgba(255,255,255,.18);background:#343b43;box-shadow:0 5px 15px rgba(0,0,0,.28);}
 body.mobile-build .slot-lbl{font-size:14px;padding:5px 0;}
@@ -265,7 +264,7 @@ body.mobile-build #race-controls .race-pad::after{
   border:2px solid rgba(255,255,255,.14);background:rgba(0,0,0,.05);
   box-shadow:inset 0 0 24px rgba(255,255,255,.04);transition:.12s ease;
 }
-body.mobile-build #race-controls #pad-clutch::after{left:72px;}
+body.mobile-build #race-controls #pad-clutch::after{left:42px;}
 body.mobile-build #race-controls #pad-accel::after{right:72px;}
 body.mobile-build #race-controls .race-pad.active::after{border-color:rgba(255,255,255,.55);transform:scale(1.08);}
 body.mobile-build .touch-feedback.clutch{width:90px;height:90px;border-width:3px;background:rgba(66,130,220,.12);}

@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.mobile.16';
+const RAT_BROWSER_VERSION='2026.06.21.mobile.20';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
