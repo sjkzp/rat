@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.20.10';
+const RAT_BROWSER_VERSION='2026.06.20.11';
 
 function initStartupSplash(){
   const splash=document.getElementById('startup-splash');
@@ -504,6 +504,9 @@ const wipeMasks={};
 function closeWipeImmediately(){
   wipeCtx.globalAlpha=1;wipeCtx.fillStyle='#000';wipeCtx.fillRect(0,0,960,540);
 }
+function openWipeImmediately(){
+  wipeCtx.globalAlpha=1;wipeCtx.clearRect(0,0,960,540);
+}
 closeWipeImmediately();
 function anim(ms,fn){return new Promise(res=>{const s=performance.now();function step(t){const p=CLAMP((t-s)/ms,0,1);fn(p);if(p<1)requestAnimationFrame(step);else res();}requestAnimationFrame(step);});}
 async function prepareWipeMask(style){
@@ -575,7 +578,8 @@ function animMsg(dt){
 let lastT=0;
 function loop(t){
   const dt=Math.min((t-lastT)/1000,.1); lastT=t;
-  clutchSlowOverlay.classList.toggle('active',!!(racing&&clutchSlowdown&&raceClutchActive()));
+  const raceFinished=document.getElementById('hud').classList.contains('race-finished');
+  clutchSlowOverlay.classList.toggle('active',!!(racing&&!raceFinished&&clutchSlowdown&&raceClutchActive()));
   if(!racing){
     if(Math.abs(raceBgSpeed)>.0001){
       nearOff=(nearOff+raceBgSpeed*dt)%1;
@@ -1305,6 +1309,8 @@ async function doRace(){
   const won=pSt===null||winner===pSt;
   racersEl.style.display='none';
   hud.classList.add('race-finished');
+  clutchSlowOverlay.classList.remove('active');
+  if(bgmNode)bgmNode.playbackRate.value=1;
   setRaceNumbersActive(false);
   tachoImg2.style.display='none';
   tachoNeedle.style.display='none';
@@ -1456,6 +1462,7 @@ async function loadSlot(i){
   await ensureSaveMigration();
   const slot=await idbGet('slots',i),raw=slot&&slot.data;if(!raw)return;
   resetAll();
+  openWipeImmediately();
   const parsed=parse(raw);
   let lScene='',lPc=-1,lDlg=null;
   for(const line of parsed.lines){
