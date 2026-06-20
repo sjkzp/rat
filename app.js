@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.20.13';
+const RAT_BROWSER_VERSION='2026.06.20.15';
 
 function initStartupSplash(){
   const splash=document.getElementById('startup-splash');
@@ -1633,7 +1633,7 @@ async function modsOK(){
 async function initMods(){
   statusEl.textContent='Mods/ を確認中...';
   if(await tryFetch()){await modsOK();return;}
-  statusEl.textContent='📂 Modsフォルダを選択  または  ZIPをドロップ';
+  statusEl.innerHTML='📂 <span class="folder-pick-link">Modsフォルダを選択</span>';
   statusEl.style.cursor='pointer';
 }
 

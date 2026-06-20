@@ -60,6 +60,7 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 .tbtn:hover{background:#ddd;}
 .tbtn:disabled{background:#666;color:#aaa;cursor:not-allowed;}
 #title-status{position:absolute;left:0;bottom:16px;width:960px;text-align:center;font-size:14px;color:#fff;}
+#title-status .folder-pick-link{text-decoration:underline;text-underline-offset:3px;}
 #loading-progress{display:none;position:absolute;left:360px;bottom:42px;width:240px;height:4px;overflow:hidden;background:rgba(255,255,255,.22);}
 #loading-progress.active{display:block;}
 #loading-progress span{position:absolute;top:0;left:0;width:100%;height:100%;background:#fff;transform:scaleX(0);transform-origin:left center;animation:loading-fill 1.4s ease-out infinite;}
