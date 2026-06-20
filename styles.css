@@ -84,6 +84,7 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 .slot-lbl{position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,.7);color:#fff;font-size:11px;text-align:center;padding:2px 0;}
 .slot-savebtn,.slot-loadbtn{position:absolute;height:23px;background:#f0f0f0;color:#333;border:none;font-size:13px;cursor:pointer;font-family:inherit;}
 .slot-savebtn:hover,.slot-loadbtn:hover{background:#ddd;}
+.slot-savebtn:disabled{background:#888;color:#666;cursor:not-allowed;}
 .slot-loadbtn:disabled{background:#888;color:#666;cursor:not-allowed;}
 #saves-close{position:absolute;left:400px;top:498px;width:160px;height:29px;background:#787878;color:#fff;border:none;font-size:16px;cursor:pointer;font-family:inherit;}
 #saves-close:hover{background:#999;}

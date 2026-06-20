@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.20.2';
+const RAT_BROWSER_VERSION='2026.06.20.3';
 
 function initStartupSplash(){
   const splash=document.getElementById('startup-splash');
@@ -1391,7 +1391,7 @@ async function loadSlot(i){
   if(!restoredPanels)run();
 }
 
-function buildSaveScreen(){
+function buildSaveScreen(loadOnly=false){
   const el=document.getElementById('saves'); el.innerHTML='';
   const cols=4,W=160,H=90,GX=100,GY=105,SX=200,SY=200;
   for(let i=0;i<8;i++){
@@ -1409,7 +1409,8 @@ function buildSaveScreen(){
     box.appendChild(lbl); wrap.appendChild(box);
     const sbtn=document.createElement('button'); sbtn.className='slot-savebtn'; sbtn.textContent='Save';
     sbtn.style.cssText=`left:0;top:${H+4}px;width:76px;`;
-    sbtn.addEventListener('click',()=>{saveSlot(i);buildSaveScreen();});
+    sbtn.disabled=loadOnly;
+    sbtn.addEventListener('click',()=>{if(loadOnly)return;saveSlot(i);buildSaveScreen(false);});
     const lbtn=document.createElement('button'); lbtn.className='slot-loadbtn'; lbtn.textContent='Load';
     lbtn.style.cssText=`left:84px;top:${H+4}px;width:76px;`;
     lbtn.disabled=!st;
@@ -1551,9 +1552,9 @@ document.addEventListener('drop',async e=>{
 //  UI配線
 // ═══════════════════════════════════════════════════════════════════
 document.getElementById('t-new').addEventListener('click',startGame);
-document.getElementById('t-cont').addEventListener('click',()=>{buildSaveScreen();document.getElementById('saves').style.display='block';});
+document.getElementById('t-cont').addEventListener('click',()=>{buildSaveScreen(true);document.getElementById('saves').style.display='block';});
 document.getElementById('t-opts').addEventListener('click',()=>document.getElementById('opts').style.display='block');
-document.getElementById('u-save').addEventListener('click',()=>{buildSaveScreen();document.getElementById('saves').style.display='block';});
+document.getElementById('u-save').addEventListener('click',()=>{buildSaveScreen(false);document.getElementById('saves').style.display='block';});
 document.getElementById('u-opts').addEventListener('click',()=>document.getElementById('opts').style.display='block');
 function hideMessageUi(e){if(e){e.preventDefault();e.stopPropagation();}setMsgVisible(false);}
 document.getElementById('u-hide').addEventListener('click',hideMessageUi);
@@ -1590,7 +1591,7 @@ function bindRepairedUi(){
   const saveBtn=document.getElementById('u-save');
   const optsBtn=document.getElementById('u-opts');
   const hideBtn=document.getElementById('u-hide');
-  if(saveBtn)saveBtn.onclick=()=>{buildSaveScreen();saves.style.display='block';};
+  if(saveBtn)saveBtn.onclick=()=>{buildSaveScreen(false);saves.style.display='block';};
   if(optsBtn)optsBtn.onclick=()=>{opts.style.display='block';};
   if(hideBtn)hideBtn.onclick=hideMessageUi;
 }
