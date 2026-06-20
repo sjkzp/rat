@@ -12,7 +12,7 @@ function repairStaticUi(){
   if(labels[1])labels[1].textContent='BGM音量';
   if(labels[2])labels[2].textContent='効果音量';
   const controls=document.getElementById('opts-controls');
-  if(controls)controls.innerHTML='操作方法:<br>アクセル: 右クリック / Z キー<br>クラッチ: 左クリック / Shift キー<br>シフト操作: クラッチ中に矢印キー / マウスジェスチャー';
+  if(controls)controls.innerHTML='操作方法:<br>PC　アクセル: 右クリック / Zキー<br>PC　クラッチ: 左クリック / Shiftキー<br>PC　シフト: クラッチ中に矢印キー / マウスジェスチャー<br>スマホ　左半分: クラッチ / スワイプでシフト<br>スマホ　右半分: アクセル';
   const status=document.getElementById('title-status');
   if(status)status.textContent='読み込み中...';
 }
@@ -1189,9 +1189,8 @@ async function doRace(){
         updateGearHUD(st,gearImg);
       } else {
         if(!st.clutch){
-          const gr=st.gear>0&&st.gear<=st.racer.gearRatios.length?st.racer.gearRatios[st.gear-1]*st.racer.finalGear:0;
-          const vMax=gr>0?st.racer.maxRpm/gr/60*st.racer.wheelSize*Math.PI*st.racer.baseSpeed:999;
-          if(st.gear<gearMax(st.racer.trans)&&st.speed>vMax*.92){st.clutch=true;st.shiftCD=Math.max(.02,st.racer.shiftTime);}
+          const shiftRpm=st.racer.powerRpm/st.racer.maxRpm;
+          if(st.gear<gearMax(st.racer.trans)&&st.rpm>shiftRpm){st.clutch=true;st.shiftCD=Math.max(.02,st.racer.shiftTime);}
         }
         if(st.clutch){st.shiftCD-=simDt;if(st.shiftCD<=0){st.gear=Math.min(st.gear+1,gearMax(st.racer.trans));st.clutch=false;}}
       }
