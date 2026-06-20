@@ -464,6 +464,10 @@ function clearEffect(){effectImg=null;clr(cEff);}
 const wipeEl=document.getElementById('wipe');
 const wipeCtx=wipeEl.getContext('2d');
 const wipeMasks={};
+function closeWipeImmediately(){
+  wipeCtx.globalAlpha=1;wipeCtx.fillStyle='#000';wipeCtx.fillRect(0,0,960,540);
+}
+closeWipeImmediately();
 function anim(ms,fn){return new Promise(res=>{const s=performance.now();function step(t){const p=CLAMP((t-s)/ms,0,1);fn(p);if(p<1)requestAnimationFrame(step);else res();}requestAnimationFrame(step);});}
 async function prepareWipeMask(style){
   const key=(style||'AroundToCenter').toLowerCase();
@@ -1476,6 +1480,7 @@ function resetAll(){
 async function startGame(){
   audioCtx.resume();
   resetAll(); running=true;
+  closeWipeImmediately();
   document.getElementById('title').style.display='none';
   let entry='scene_001';
   try{await readText('scene/_entrypoint.txt');entry='_entrypoint';}catch{}
