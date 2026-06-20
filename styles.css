@@ -175,7 +175,8 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
   #race-controls #pad-accel{left:auto;right:0;}
   #race-controls #pad-clutch.active{background:rgba(80,130,210,.10);}
   #race-controls #pad-accel.active{background:rgba(40,190,100,.10);}
-  #SpeedDisplay{top:443px!important;}
+  #TimeDisplay{top:417px!important;}
+  #DistanceDisplay{top:473px!important;}
 
   #saves-close{top:458px;width:180px;height:34px;left:390px;font-size:16px;}
   #opts-close{top:468px;width:180px;height:34px;left:390px;font-size:16px;}
