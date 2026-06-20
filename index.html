@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="mobile-build">
 <div id="wrap">
 <div id="stage">
   <div id="startup-splash">
@@ -82,12 +82,21 @@
     <div id="opts-controls">操作方法：<br>PC　アクセル：右クリック / Zキー<br>PC　クラッチ：左クリック / Shiftキー<br>PC　シフト：クラッチ中に矢印キー / マウスジェスチャー<br>スマホ　画面左半分：クラッチ / スワイプでシフト<br>スマホ　画面右半分：アクセル</div>
     <input id="o-clutch-slow" type="checkbox">
     <label id="o-clutch-slow-label" for="o-clutch-slow">クラッチ操作のとき時間の進みを遅くする</label>
-    <button id="opts-close">Close</button>
+    <button id="opts-close" title="Close" aria-label="Close">×</button>
   </div>
   <!-- セーブ -->
   <div id="saves"></div>
 </div><!-- #stage -->
 </div><!-- #wrap -->
+
+<div id="mobile-race-input">
+  <div class="mobile-race-zone" id="mobile-clutch-zone"></div>
+  <div class="mobile-race-zone" id="mobile-accel-zone"></div>
+</div>
+
+<div id="rotate-device" aria-label="Rotate device">
+  <div class="rotate-device-icon"><span></span></div>
+</div>
 
 <script src="app.js"></script>
 </body>
