@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.20.9';
+const RAT_BROWSER_VERSION='2026.06.20.10';
 
 function initStartupSplash(){
   const splash=document.getElementById('startup-splash');
@@ -1403,12 +1403,58 @@ function captureStagePreview(){
   }
   return out.toDataURL('image/jpeg',.72);
 }
-function saveSlot(i){
-  localStorage.setItem('RAT.sv'+i,buildSave());localStorage.setItem('RAT.st'+i,new Date().toLocaleString());
-  try{localStorage.setItem('RAT.thumb'+i,captureStagePreview());}catch{}
+const SAVE_DB_NAME='RATSaveDB',SAVE_DB_VERSION=1;
+let saveDbPromise=null,saveMigrationPromise=null;
+function openSaveDb(){
+  if(saveDbPromise)return saveDbPromise;
+  saveDbPromise=new Promise((resolve,reject)=>{
+    const req=indexedDB.open(SAVE_DB_NAME,SAVE_DB_VERSION);
+    req.onupgradeneeded=()=>{
+      const db=req.result;
+      if(!db.objectStoreNames.contains('slots'))db.createObjectStore('slots',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('meta'))db.createObjectStore('meta',{keyPath:'key'});
+    };
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+  return saveDbPromise;
+}
+async function idbGet(store,key){
+  const db=await openSaveDb();
+  return new Promise((resolve,reject)=>{
+    const req=db.transaction(store,'readonly').objectStore(store).get(key);
+    req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);
+  });
+}
+async function idbPut(store,value){
+  const db=await openSaveDb();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(store,'readwrite');tx.objectStore(store).put(value);
+    tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);
+  });
+}
+function ensureSaveMigration(){
+  if(saveMigrationPromise)return saveMigrationPromise;
+  saveMigrationPromise=(async()=>{
+    if(await idbGet('meta','legacy-localstorage-v1'))return;
+    for(let i=0;i<8;i++){
+      if(await idbGet('slots',i))continue;
+      const data=localStorage.getItem('RAT.sv'+i);if(!data)continue;
+      await idbPut('slots',{id:i,data,timestamp:localStorage.getItem('RAT.st'+i)||'',thumbnail:localStorage.getItem('RAT.thumb'+i)||''});
+    }
+    await idbPut('meta',{key:'legacy-localstorage-v1',completedAt:Date.now()});
+    for(let i=0;i<8;i++)for(const key of ['RAT.sv','RAT.st','RAT.thumb'])localStorage.removeItem(key+i);
+  })();
+  return saveMigrationPromise;
+}
+async function saveSlot(i){
+  await ensureSaveMigration();
+  let thumbnail='';try{thumbnail=captureStagePreview();}catch{}
+  await idbPut('slots',{id:i,data:buildSave(),timestamp:new Date().toLocaleString(),thumbnail});
 }
 async function loadSlot(i){
-  const raw=localStorage.getItem('RAT.sv'+i); if(!raw)return;
+  await ensureSaveMigration();
+  const slot=await idbGet('slots',i),raw=slot&&slot.data;if(!raw)return;
   resetAll();
   const parsed=parse(raw);
   let lScene='',lPc=-1,lDlg=null;
@@ -1430,8 +1476,10 @@ async function loadSlot(i){
   if(!restoredPanels)run();
 }
 
-function buildSaveScreen(loadOnly=false){
-  const el=document.getElementById('saves'); el.innerHTML='';
+async function buildSaveScreen(loadOnly=false){
+  const el=document.getElementById('saves');el.innerHTML='';
+  await ensureSaveMigration();
+  const slots=await Promise.all(Array.from({length:8},(_,i)=>idbGet('slots',i)));
   const cols=4,W=160,H=90,GX=100,GY=105,SX=200,SY=200;
   for(let i=0;i<8;i++){
     const c=i%cols,row=Math.floor(i/cols);
@@ -1440,20 +1488,20 @@ function buildSaveScreen(loadOnly=false){
     wrap.className='slot-wrap'; wrap.style.cssText=`left:${bx}px;top:${by}px;`;
     const box=document.createElement('div');
     box.className='slot-box'; box.style.cssText=`width:${W}px;height:${H}px;`;
-    const thumb=localStorage.getItem('RAT.thumb'+i);
+    const slot=slots[i],thumb=slot&&slot.thumbnail;
     if(thumb){const preview=document.createElement('img');preview.className='slot-preview';preview.src=thumb;box.appendChild(preview);}
     const lbl=document.createElement('div');
-    const st=localStorage.getItem('RAT.st'+i)||'';
+    const st=slot&&slot.timestamp||'';
     lbl.className='slot-lbl'; lbl.textContent=st||'NO DATA';
     box.appendChild(lbl); wrap.appendChild(box);
     const sbtn=document.createElement('button'); sbtn.className='slot-savebtn'; sbtn.textContent='Save';
     sbtn.style.cssText=`left:0;top:${H+4}px;width:76px;`;
     sbtn.disabled=loadOnly;
-    sbtn.addEventListener('click',()=>{if(loadOnly)return;saveSlot(i);buildSaveScreen(false);});
+    sbtn.addEventListener('click',async()=>{if(loadOnly)return;await saveSlot(i);await buildSaveScreen(false);});
     const lbtn=document.createElement('button'); lbtn.className='slot-loadbtn'; lbtn.textContent='Load';
     lbtn.style.cssText=`left:84px;top:${H+4}px;width:76px;`;
     lbtn.disabled=!st;
-    lbtn.addEventListener('click',()=>{el.style.display='none';loadSlot(i);});
+    lbtn.addEventListener('click',async()=>{el.style.display='none';await loadSlot(i);});
     wrap.appendChild(sbtn); wrap.appendChild(lbtn);
     el.appendChild(wrap);
   }
@@ -1600,9 +1648,9 @@ document.addEventListener('drop',async e=>{
 //  UI配線
 // ═══════════════════════════════════════════════════════════════════
 document.getElementById('t-new').addEventListener('click',startGame);
-document.getElementById('t-cont').addEventListener('click',()=>{buildSaveScreen(true);document.getElementById('saves').style.display='block';});
+document.getElementById('t-cont').addEventListener('click',async()=>{document.getElementById('saves').style.display='block';await buildSaveScreen(true);});
 document.getElementById('t-opts').addEventListener('click',()=>document.getElementById('opts').style.display='block');
-document.getElementById('u-save').addEventListener('click',()=>{buildSaveScreen(false);document.getElementById('saves').style.display='block';});
+document.getElementById('u-save').addEventListener('click',async()=>{document.getElementById('saves').style.display='block';await buildSaveScreen(false);});
 document.getElementById('u-opts').addEventListener('click',()=>document.getElementById('opts').style.display='block');
 function hideMessageUi(e){if(e){e.preventDefault();e.stopPropagation();}setMsgVisible(false);}
 document.getElementById('u-hide').addEventListener('click',hideMessageUi);
@@ -1639,7 +1687,7 @@ function bindRepairedUi(){
   const saveBtn=document.getElementById('u-save');
   const optsBtn=document.getElementById('u-opts');
   const hideBtn=document.getElementById('u-hide');
-  if(saveBtn)saveBtn.onclick=()=>{buildSaveScreen(false);saves.style.display='block';};
+  if(saveBtn)saveBtn.onclick=async()=>{saves.style.display='block';await buildSaveScreen(false);};
   if(optsBtn)optsBtn.onclick=()=>{opts.style.display='block';};
   if(hideBtn)hideBtn.onclick=hideMessageUi;
 }
