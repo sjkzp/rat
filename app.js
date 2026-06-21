@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.34';
+const RAT_BROWSER_VERSION='2026.06.21.35';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -1106,7 +1106,9 @@ function bindMobileRaceZone(id,key){
   };
   const begin=(idValue,p,e)=>{
     if(inputId!==null)return false;
-    inputId=idValue;rotatedAtStart=document.body.classList.contains('portrait-locked-layout');
+    const orientationType=screen.orientation&&screen.orientation.type||'';
+    const nativeLandscape=orientationType.startsWith('landscape')||Math.abs(Number(window.orientation))===90||innerWidth>innerHeight;
+    inputId=idValue;rotatedAtStart=document.body.classList.contains('portrait-locked-layout')&&!nativeLandscape;
     padInput[key]=true;if(e.cancelable)e.preventDefault();e.stopPropagation();
     if(key==='accel'){rightAccelHeld=true;mouse.r=true;latchAccel(1000);}
     feedback=document.createElement('div');feedback.className='mobile-touch-feedback '+key;
