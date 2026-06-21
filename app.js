@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.31';
+const RAT_BROWSER_VERSION='2026.06.21.33';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -867,6 +867,10 @@ async function doShake(){
 // ═══════════════════════════════════════════════════════════════════
 function gearMax(trans){return trans.endsWith('4')?4:trans.endsWith('5')?5:6;}
 
+function stepFreeRev(st,accel,dt){
+  st.rpm=CLAMP(st.rpm+(accel?4.5:-2.4)*dt,0,1);
+}
+
 function simStep(st,accel,dt){
   const r=st.racer;
   const gr=st.gear>0&&st.gear<=r.gearRatios.length?r.gearRatios[st.gear-1]*r.finalGear:0;
@@ -882,7 +886,8 @@ function simStep(st,accel,dt){
   st.speed=Math.max(0,st.speed+(drive-drag)*dt);
   if(!accel||st.clutch)st.speed*=Math.max(0,1-.05*dt);
   st.distance+=st.speed*dt;
-  if(st.gear<=0||st.clutch)st.rpm=CLAMP(st.rpm+(accel?2:-2)*dt,0,1);
+  if(st.gear<=0)stepFreeRev(st,accel,dt);
+  else if(st.clutch)st.rpm=CLAMP(st.rpm+(accel?2.8:-2)*dt,0,1);
   else st.rpm=rpm;
 }
 
@@ -1089,37 +1094,29 @@ bindRacePad('pad-accel','accel');
 bindRacePad('pad-clutch','clutch');
 function bindMobileRaceZone(id,key){
   const el=document.getElementById(id);if(!el)return;
-  let pointerId=null,feedback=null;
-  const inputPoint=e=>document.body.classList.contains('portrait-locked-layout')
-    ?{x:e.clientY,y:-e.clientX}:{x:e.clientX,y:e.clientY};
-  const move=e=>{
+  let inputId=null,feedback=null,rotatedAtStart=false,stopTracking=()=>{};
+  const inputPoint=p=>rotatedAtStart?{x:p.clientY,y:-p.clientX}:{x:p.clientX,y:p.clientY};
+  const move=p=>{
     if(!feedback)return;
-    feedback.style.left=e.clientX+'px';feedback.style.top=e.clientY+'px';
+    feedback.style.left=p.clientX+'px';feedback.style.top=p.clientY+'px';
     if(key==='accel')latchAccel(320);
-    if(key==='clutch'){const p=inputPoint(e);handleRaceGestureMove(p.x,p.y);}
+    if(key==='clutch'){const point=inputPoint(p);handleRaceGestureMove(point.x,point.y);}
   };
-  const track=e=>{if(e.pointerId===pointerId){if(e.cancelable)e.preventDefault();move(e);}};
-  const stopTracking=()=>{
-    window.removeEventListener('pointermove',track);
-    window.removeEventListener('pointerup',release,true);
-    window.removeEventListener('pointercancel',release,true);
-  };
-  el.addEventListener('pointerdown',e=>{
-    if(pointerId!==null)return;
-    pointerId=e.pointerId;padInput[key]=true;e.preventDefault();e.stopPropagation();
+  const begin=(idValue,p,e)=>{
+    if(inputId!==null)return false;
+    inputId=idValue;rotatedAtStart=document.body.classList.contains('portrait-locked-layout');
+    padInput[key]=true;if(e.cancelable)e.preventDefault();e.stopPropagation();
     if(key==='accel'){rightAccelHeld=true;mouse.r=true;latchAccel(1000);}
-    window.addEventListener('pointermove',track,{passive:false});
-    window.addEventListener('pointerup',release,true);
-    window.addEventListener('pointercancel',release,true);
     feedback=document.createElement('div');feedback.className='mobile-touch-feedback '+key;
     document.getElementById('mobile-race-input').appendChild(feedback);
-    if(key==='clutch'){const p=inputPoint(e);gesture={x:p.x,y:p.y};gShifted=false;}
+    if(key==='clutch'){const point=inputPoint(p);gesture={x:point.x,y:point.y};gShifted=false;}
     if(navigator.vibrate)navigator.vibrate(key==='accel'?10:14);
-    move(e);
-  });
-  const release=e=>{
-    if(pointerId===null||e.pointerId!==pointerId)return;
-    stopTracking();padInput[key]=false;pointerId=null;if(e.cancelable)e.preventDefault();e.stopPropagation();
+    move(p);return true;
+  };
+  const finish=(idValue,p,e)=>{
+    if(inputId===null||idValue!==inputId)return;
+    if(p&&Number.isFinite(p.clientX)&&Number.isFinite(p.clientY))move(p);
+    stopTracking();padInput[key]=false;inputId=null;if(e.cancelable)e.preventDefault();e.stopPropagation();
     if(key==='accel'){rightAccelHeld=false;mouse.r=false;accelLatchUntil=0;}
     if(feedback){feedback.remove();feedback=null;}
     if(key==='clutch'){
@@ -1128,6 +1125,38 @@ function bindMobileRaceZone(id,key){
       if(st){if(st.clutchGear!==st.gear){playShiftEffect(st);if(navigator.vibrate)navigator.vibrate(24);st.clutchGear=st.gear;}st.clutch=false;}
     }
   };
+
+  const useTouchEvents=('ontouchstart'in window)&&navigator.maxTouchPoints>0;
+  if(useTouchEvents){
+    const findTouch=(list,idValue)=>Array.from(list||[]).find(t=>t.identifier===idValue)||null;
+    const track=e=>{const t=findTouch(e.touches,inputId);if(t){if(e.cancelable)e.preventDefault();move(t);}};
+    const release=e=>{const t=findTouch(e.changedTouches,inputId);if(t)finish(t.identifier,t,e);};
+    stopTracking=()=>{
+      window.removeEventListener('touchmove',track,true);
+      window.removeEventListener('touchend',release,true);
+      window.removeEventListener('touchcancel',release,true);
+    };
+    el.addEventListener('touchstart',e=>{
+      const t=e.changedTouches&&e.changedTouches[0];if(!t||!begin(t.identifier,t,e))return;
+      window.addEventListener('touchmove',track,{capture:true,passive:false});
+      window.addEventListener('touchend',release,true);
+      window.addEventListener('touchcancel',release,true);
+    },{passive:false});
+  }else{
+    const track=e=>{if(e.pointerId===inputId){if(e.cancelable)e.preventDefault();move(e);}};
+    const release=e=>finish(e.pointerId,e,e);
+    stopTracking=()=>{
+      window.removeEventListener('pointermove',track,true);
+      window.removeEventListener('pointerup',release,true);
+      window.removeEventListener('pointercancel',release,true);
+    };
+    el.addEventListener('pointerdown',e=>{
+      if(!begin(e.pointerId,e,e))return;
+      window.addEventListener('pointermove',track,{capture:true,passive:false});
+      window.addEventListener('pointerup',release,true);
+      window.addEventListener('pointercancel',release,true);
+    });
+  }
 }
 bindMobileRaceZone('mobile-clutch-zone','clutch');
 bindMobileRaceZone('mobile-accel-zone','accel');
@@ -1226,8 +1255,15 @@ async function doRace(){
     if(signalTex[value]){sig.src=signalTex[value];sig.style.display='block';}
     if(signalSfx[value])playSFX(signalSfx[value]);
     const begun=performance.now();
+    let revLast=begun;
     while(true){
       syncCountdownInput();
+      const revNow=performance.now(),revDt=Math.min((revNow-revLast)/1000,.08);revLast=revNow;
+      if(pSt&&pSt.gear===0){
+        stepFreeRev(pSt,raceAccelActive(),revDt);
+        tachoNeedle.style.transform=`rotate(${-LERP(145,-60,pSt.rpm)}deg)`;
+        setEngPitch(1+pSt.rpm*5);
+      }
       if(raceAccelActive()&&(!pSt||pSt.gear!==0))return true;
       const elapsed=performance.now()-begun;
       const progress=Math.pow(CLAMP(elapsed/1000*3,0,1),2);
