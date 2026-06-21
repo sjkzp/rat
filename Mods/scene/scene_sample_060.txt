@@ -82,14 +82,14 @@ Jump,#menu_panel
 DisposelAllPanels
 SetPen,0.1,0.12
 SetPanel,,,サイフ,Left,{%Money}円,Right,,#00003377,0.78,
-SetPen,0.1,0.23
-SetPanel,Selectable,#shop_body_menu,ボディ,Left,,,,,0.36,
-SetPen,0.1,0.34
-SetPanel,Selectable,#shop_engine_menu,エンジン,Left,,,,,0.36,
-SetPen,0.52,0.23
-SetPanel,Selectable,#shop_mech_menu,その他,Left,,,,,0.36,
-SetPen,0.52,0.34
-SetPanel,Selectable,#shop_exit,戻る,Left,,,,,0.36,
+SetPen,0.16,0.27
+SetPanel,Selectable,#shop_body_menu,ボディ,Left,,,,,0.44,
+SetPen,0.16,0.38
+SetPanel,Selectable,#shop_engine_menu,エンジン,Left,,,,,0.44,
+SetPen,0.16,0.49
+SetPanel,Selectable,#shop_mech_menu,その他,Left,,,,,0.44,
+SetPen,0.62,0.49
+SetPanel,Selectable,#shop_exit,戻る,Left,,,,,0.32,
 ,,チューンの種類を選択
 Stop
 
