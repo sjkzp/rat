@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.33';
+const RAT_BROWSER_VERSION='2026.06.21.34';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -976,14 +976,16 @@ stage.addEventListener('mouseup',reconcileMouseRelease);
 function handleRaceGestureMove(x,y){
   if(racing&&gesture&&raceClutchActive()){
     const dx=x-gesture.x,dy=y-gesture.y;
-    if(Math.max(Math.abs(dx),Math.abs(dy))>=44){
-      const ps=rStates.find(s=>s.racer.type.toLowerCase()==='player');
-      if(!ps)return;
-      const car=ps.racer.trans.toLowerCase().startsWith('car');
-      if(!car&&gShifted)return;
-      if(Math.abs(dx)>Math.abs(dy))shiftInput(ps,dx>0?1:-1,0);else shiftInput(ps,0,dy<0?1:-1);
-      if(car)gesture={x,y};else gShifted=true;
+    const ps=rStates.find(s=>s.racer.type.toLowerCase()==='player');
+    if(!ps)return;
+    const car=ps.racer.trans.toLowerCase().startsWith('car');
+    if(!car){
+      if(gShifted||Math.abs(dy)<52||Math.abs(dy)<Math.abs(dx)*.75)return;
+      shiftInput(ps,0,dy<0?1:-1);gShifted=true;return;
     }
+    if(Math.max(Math.abs(dx),Math.abs(dy))<44)return;
+    if(Math.abs(dx)>Math.abs(dy))shiftInput(ps,dx>0?1:-1,0);else shiftInput(ps,0,dy<0?1:-1);
+    gesture={x,y};
   }
 }
 stage.addEventListener('mousemove',e=>{
