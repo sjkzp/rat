@@ -45,8 +45,10 @@ Mods/bgm        BGM
 Mods/sound      効果音
 Mods/effect     雨・霧・風などのエフェクト
 Mods/essential  共通UI素材
+Mods/font       ゲームUI用カスタムフォント
 </code>
 </div>
+
 
 
 
@@ -596,6 +598,24 @@ ShakeAll
 </code>
 黒いメッセージボックスを上下に短時間揺らす。約0.28秒間、上下交互に8回移動する。
 現行版ではShakeとShakeAllは同じ動作になる。背景、立ち絵、選択肢、レースHUDは揺れない。
+</div>
+
+<div class="カスタムフォント">
+「Mods/font」フォルダへフォントを1ファイル配置すると、ゲームUI全体のフォントを変更できる。
+
+<code>
+Mods/font/font.ttf
+Mods/font/font.otf
+</code>
+
+ブラウザ版をWebサイトで公開する場合は「font.ttf」または「font.otf」のファイル名を使用する。
+Modsフォルダ／ZIPを手動選択する場合は、任意名の.ttf、.otf、.woff、.woff2にも対応する。
+
+Windows exe版は.ttf、.otfに対応。「font.ttf」「font.otf」を優先し、それ以外はファイル名順で最初のフォントを使用する。
+フォントがない場合や読み込めない場合は、RAT標準フォントへ戻る。
+
+※日本語を表示する作品では、日本語グリフを収録したフォントを使用すること。
+※ゲームと一緒にフォントを配布できるか、フォントのライセンスを必ず確認すること。
 </div>
 
 
