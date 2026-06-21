@@ -1,11 +1,11 @@
 #top
 SetValue,TotalPrize,0
 ,,ランダム数値のサンプル
-,,このサンプルを動かしているシーンファイルは<br>「Mods/scene」フォルダ内の「scene_sample_025.txt」です
+,,このサンプルを動かしているシーンファイルは<br>「Mods/scene」フォルダ内の「scene_sample_090.txt」です
 
-,,まずは1から6の整数を作る、さいころの例です
+,,まずは1～6の中からランダムな数値を取得するサイコロの例です
 Rnd,Dice,1,6
-,,さいころを振った結果は「{%Dice}」でした。
+,,サイコロを振った結果は「{%Dice}」でした。
 ,,次は1から100の抽選値を使い、確率の異なる3種類の結果へ分岐します
 
 #draw
@@ -20,17 +20,17 @@ Jump,#prize_third
 
 #prize_first
 AddValue,TotalPrize,10000
-,,抽選値は{%Lottery}！<br>大当たり！ 10000円を獲得しました
+,,抽選値は「{%Lottery}」！<br>大当たり！ 10000円を獲得しました
 Jump,#result
 
 #prize_second
 AddValue,TotalPrize,3000
-,,抽選値は{%Lottery}！<br>当たり！ 3000円を獲得しました
+,,抽選値は「{%Lottery}」！<br>当たり！ 3000円を獲得しました
 Jump,#result
 
 #prize_third
 AddValue,TotalPrize,500
-,,抽選値は{%Lottery}。<br>参加賞として500円を獲得しました
+,,抽選値は「{%Lottery}」。<br>参加賞として500円を獲得しました
 Jump,#result
 
 #result
