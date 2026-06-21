@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.35';
+const RAT_BROWSER_VERSION='2026.06.21.37';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -1096,8 +1096,17 @@ bindRacePad('pad-accel','accel');
 bindRacePad('pad-clutch','clutch');
 function bindMobileRaceZone(id,key){
   const el=document.getElementById(id);if(!el)return;
-  let inputId=null,feedback=null,rotatedAtStart=false,stopTracking=()=>{};
-  const inputPoint=p=>rotatedAtStart?{x:p.clientY,y:-p.clientX}:{x:p.clientX,y:p.clientY};
+  let inputId=null,feedback=null,inputMatrix=null,rotatedFallback=false,stopTracking=()=>{};
+  const inputPoint=p=>inputMatrix
+    ?{x:inputMatrix.a*p.clientX+inputMatrix.c*p.clientY,y:inputMatrix.b*p.clientX+inputMatrix.d*p.clientY}
+    :(rotatedFallback?{x:p.clientY,y:-p.clientX}:{x:p.clientX,y:p.clientY});
+  const inverseInputMatrix=()=>{
+    const value=getComputedStyle(document.getElementById('wrap')).transform;
+    const match=value.match(/^matrix\(([^)]+)\)$/);if(!match)return null;
+    const n=match[1].split(',').map(Number);if(n.length!==6||n.some(v=>!Number.isFinite(v)))return null;
+    const [a,b,c,d]=n,det=a*d-b*c;if(Math.abs(det)<.000001)return null;
+    return{a:d/det,b:-b/det,c:-c/det,d:a/det};
+  };
   const move=p=>{
     if(!feedback)return;
     feedback.style.left=p.clientX+'px';feedback.style.top=p.clientY+'px';
@@ -1106,9 +1115,9 @@ function bindMobileRaceZone(id,key){
   };
   const begin=(idValue,p,e)=>{
     if(inputId!==null)return false;
-    const orientationType=screen.orientation&&screen.orientation.type||'';
-    const nativeLandscape=orientationType.startsWith('landscape')||Math.abs(Number(window.orientation))===90||innerWidth>innerHeight;
-    inputId=idValue;rotatedAtStart=document.body.classList.contains('portrait-locked-layout')&&!nativeLandscape;
+    inputId=idValue;inputMatrix=null;
+    rotatedFallback=document.body.classList.contains('portrait-locked-layout');
+    try{inputMatrix=inverseInputMatrix();}catch{inputMatrix=null;}
     padInput[key]=true;if(e.cancelable)e.preventDefault();e.stopPropagation();
     if(key==='accel'){rightAccelHeld=true;mouse.r=true;latchAccel(1000);}
     feedback=document.createElement('div');feedback.className='mobile-touch-feedback '+key;
