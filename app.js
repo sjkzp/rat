@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.38';
+const RAT_BROWSER_VERSION='2026.06.21.45';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -152,7 +152,7 @@ const CMD_SET=new Set(['jump','scene','setbackground','setportrait','moveportrai
   'disposeallpanel','disposeallpanels','disposelallpanels','stop','setitem','checkitem',
   'deleteitem','clearitem','racesetup','racestart','setracebackground','moveracebackground',
   'movebackground','seteffect','cleareffect','setracer','driveracer','moveracer','clearracer',
-  'setvalue','addvalue','subvalue','multivalue','multvalue','divvalue','checkvalue','rnd',
+  'setvalue','addvalue','subvalue','multivalue','multvalue','divvalue','checkvalue','rnd','random',
   'shake','shakeall','loaded','setracerbackground']);
 
 function parse(src){
@@ -758,7 +758,17 @@ async function execCmd(line){
     case 'subvalue':  vSet(A(a,0),vGet(A(a,0))-F(A(a,1))); break;
     case 'multivalue':case 'multvalue': vSet(A(a,0),vGet(A(a,0))*F(A(a,1))); break;
     case 'divvalue':  vSet(A(a,0),vGet(A(a,0))/Math.max(1e-9,F(A(a,1),1))); break;
-    case 'rnd':       vSet(A(a,0),Math.floor(Math.random()*Math.max(1,Math.round(F(A(a,1),1))))); break;
+    case 'rnd':case 'random':{
+      const key=A(a,0);
+      if(a.length>=3){
+        let min=Math.ceil(F(A(a,1))),max=Math.floor(F(A(a,2)));
+        if(min>max)[min,max]=[max,min];
+        vSet(key,min+Math.floor(Math.random()*(max-min+1)));
+      }else{
+        const max=Math.max(1,Math.round(F(A(a,1),1)));
+        vSet(key,Math.floor(Math.random()*max));
+      }
+    }break;
     case 'checkvalue': if(cmp(vGet(A(a,0)),A(a,1),F(A(a,2))))jumpTo(A(a,3)); break;
 
     case 'setitem':{
