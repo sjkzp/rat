@@ -14,7 +14,6 @@
 
 <header class="site-header">
 <div>
-<p class="eyebrow">RACE ADV TOOL</p>
 <h1>RAT リファレンス</h1>
 <p>Sceneファイルの構文とゲーム制作に必要な設定を確認できます。</p>
 </div>
@@ -595,7 +594,8 @@ Rnd,Dice,1,6
 Shake
 ShakeAll
 </code>
-画面全体を短時間揺らす。ShakeとShakeAllは同じ動作として使用できる。
+黒いメッセージボックスを上下に短時間揺らす。約0.28秒間、上下交互に8回移動する。
+現行版ではShakeとShakeAllは同じ動作になる。背景、立ち絵、選択肢、レースHUDは揺れない。
 </div>
 
 
@@ -735,7 +735,6 @@ body{
 }
 .site-header h1{margin:0;font-size:30px;line-height:1.2;letter-spacing:0;}
 .site-header p{margin:8px 0 0;color:#cbd1d6;}
-.site-header .eyebrow{margin:0 0 6px;color:#66d19e;font:700 12px/1.2 Arial,sans-serif;}
 .search{display:block;width:min(360px,40vw);color:#dce1e5;font-size:12px;font-weight:700;}
 .search span{display:block;margin-bottom:6px;}
 .search input{
