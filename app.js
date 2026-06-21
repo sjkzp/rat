@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.45';
+const RAT_BROWSER_VERSION='2026.06.21.48';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -97,6 +97,27 @@ async function readBlob(folder,name,...exts){
   return null;
 }
 
+async function readCustomFontBlob(){
+  const conventional=await readBlob('font','font','.ttf','.otf','.woff2','.woff');
+  if(conventional||FS_MODE==='fetch')return conventional;
+  const key=Object.keys(zipFiles).filter(k=>k.startsWith('font/')&&/\.(ttf|otf|woff2?|woff)$/i.test(k)).sort()[0];
+  if(!key)return null;
+  const entry=zipFiles[key];
+  return new Blob([FS_MODE==='zip'?await entry.async('arraybuffer'):await entry.arrayBuffer()]);
+}
+
+let activeGameFontFamily='Meiryo';
+async function loadCustomFont(){
+  try{
+    const blob=await readCustomFontBlob(); if(!blob)return false;
+    const face=new FontFace('RATCustomFont',await blob.arrayBuffer());
+    await face.load(); document.fonts.add(face);
+    activeGameFontFamily='RATCustomFont';
+    document.documentElement.style.setProperty('--rat-font','"RATCustomFont","Meiryo","MS Gothic",monospace');
+    return true;
+  }catch(error){console.warn('Custom font could not be loaded:',error);return false;}
+}
+
 async function tryFetch(){
   for(const n of['_entrypoint','scene_001']){
     try{const r=await fetch(MODS+'scene/'+n+'.txt',{method:'HEAD'});if(r.ok){FS_MODE='fetch';return true;}}catch{}
@@ -105,7 +126,12 @@ async function tryFetch(){
 }
 async function pickFolder(){
   if(!window.showDirectoryPicker)return false;
-  let root; try{root=await window.showDirectoryPicker();}catch{return false;}
+  let root;
+  try{root=await window.showDirectoryPicker({id:'rat-mods-root',mode:'read'});}
+  catch(error){
+    if(!error||error.name!=='TypeError')return false;
+    try{root=await window.showDirectoryPicker();}catch{return false;}
+  }
   zipFiles={};
   async function walk(dh,pre){
     for await(const[n,h] of dh.entries()){
@@ -1529,8 +1555,8 @@ function captureStagePreview(){
   }
   if(msgVisible&&!forceHideUi){
     const g=ctx.createLinearGradient(0,371,0,540);g.addColorStop(0,'rgba(10,16,30,0)');g.addColorStop(.35,'rgba(10,16,30,.88)');g.addColorStop(1,'rgba(10,16,30,.97)');ctx.fillStyle=g;ctx.fillRect(0,371,960,169);
-    ctx.fillStyle='#fff';ctx.font='bold 18px Meiryo';ctx.fillText(spkEl.textContent,100,463);
-    ctx.font='18px Meiryo';let y=489;for(const line of msgEl.textContent.split('\n').slice(0,3)){ctx.fillText(line,100,y);y+=27;}
+    ctx.fillStyle='#fff';ctx.font=`bold 18px "${activeGameFontFamily}"`;ctx.fillText(spkEl.textContent,100,463);
+    ctx.font=`18px "${activeGameFontFamily}"`;let y=489;for(const line of msgEl.textContent.split('\n').slice(0,3)){ctx.fillText(line,100,y);y+=27;}
   }
   return out.toDataURL('image/jpeg',.72);
 }
@@ -1660,6 +1686,7 @@ async function buildSaveScreen(loadOnly=false){
 //  テーマ読み込み
 // ═══════════════════════════════════════════════════════════════════
 async function loadTheme(){
+  await loadCustomFont();
   initSpriteNumbers();
   const ti=await getImg('background','title','.png','.jpg');
   if(ti)document.getElementById('title-bg').src=ti.src;
@@ -1808,12 +1835,13 @@ document.getElementById('u-hide').addEventListener('click',hideMessageUi);
 document.getElementById('opts-close').addEventListener('click',()=>document.getElementById('opts').style.display='none');
 
 // オプションスライダー
-const oSpeed=document.getElementById('o-speed'); oSpeed.value=S.get('tw',.05);
-oSpeed.addEventListener('input',()=>S.set('tw',parseFloat(oSpeed.value)));
-const oBgm=document.getElementById('o-bgm'); oBgm.value=bgmVol;
-oBgm.addEventListener('input',()=>{bgmVol=+oBgm.value;bgmGain.gain.value=bgmVol;S.set('bgm',bgmVol);});
-const oSfx=document.getElementById('o-sfx'); oSfx.value=sfxVol;
-oSfx.addEventListener('input',()=>{sfxVol=+oSfx.value;sfxGain.gain.value=sfxVol;engGain.gain.value=sfxVol;S.set('sfx',sfxVol);});
+function updateOptionValue(slider,output){output.textContent=String(Math.round(parseFloat(slider.value)*100));}
+const oSpeed=document.getElementById('o-speed'),oSpeedValue=document.getElementById('o-speed-value'); oSpeed.value=S.get('tw',.05);updateOptionValue(oSpeed,oSpeedValue);
+oSpeed.addEventListener('input',()=>{S.set('tw',parseFloat(oSpeed.value));updateOptionValue(oSpeed,oSpeedValue);});
+const oBgm=document.getElementById('o-bgm'),oBgmValue=document.getElementById('o-bgm-value'); oBgm.value=bgmVol;updateOptionValue(oBgm,oBgmValue);
+oBgm.addEventListener('input',()=>{bgmVol=+oBgm.value;bgmGain.gain.value=bgmVol;S.set('bgm',bgmVol);updateOptionValue(oBgm,oBgmValue);});
+const oSfx=document.getElementById('o-sfx'),oSfxValue=document.getElementById('o-sfx-value'); oSfx.value=sfxVol;updateOptionValue(oSfx,oSfxValue);
+oSfx.addEventListener('input',()=>{sfxVol=+oSfx.value;sfxGain.gain.value=sfxVol;engGain.gain.value=sfxVol;S.set('sfx',sfxVol);updateOptionValue(oSfx,oSfxValue);});
 const oClutchSlow=document.getElementById('o-clutch-slow'); oClutchSlow.checked=clutchSlowdown;
 oClutchSlow.addEventListener('change',()=>{clutchSlowdown=oClutchSlow.checked;S.set('clutchSlowdown',clutchSlowdown);});
 
