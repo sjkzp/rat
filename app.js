@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.26';
+const RAT_BROWSER_VERSION='2026.06.21.29';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -971,7 +971,7 @@ stage.addEventListener('mouseup',reconcileMouseRelease);
 function handleRaceGestureMove(x,y){
   if(racing&&gesture&&raceClutchActive()){
     const dx=x-gesture.x,dy=y-gesture.y;
-    if(Math.max(Math.abs(dx),Math.abs(dy))>=60){
+    if(Math.max(Math.abs(dx),Math.abs(dy))>=44){
       const ps=rStates.find(s=>s.racer.type.toLowerCase()==='player');
       if(!ps)return;
       const car=ps.racer.trans.toLowerCase().startsWith('car');
@@ -1098,21 +1098,28 @@ function bindMobileRaceZone(id,key){
     if(key==='accel')latchAccel(320);
     if(key==='clutch'){const p=inputPoint(e);handleRaceGestureMove(p.x,p.y);}
   };
+  const track=e=>{if(e.pointerId===pointerId){if(e.cancelable)e.preventDefault();move(e);}};
+  const stopTracking=()=>{
+    window.removeEventListener('pointermove',track);
+    window.removeEventListener('pointerup',release,true);
+    window.removeEventListener('pointercancel',release,true);
+  };
   el.addEventListener('pointerdown',e=>{
     if(pointerId!==null)return;
     pointerId=e.pointerId;padInput[key]=true;e.preventDefault();e.stopPropagation();
     if(key==='accel'){rightAccelHeld=true;mouse.r=true;latchAccel(1000);}
-    try{el.setPointerCapture(pointerId);}catch{}
+    window.addEventListener('pointermove',track,{passive:false});
+    window.addEventListener('pointerup',release,true);
+    window.addEventListener('pointercancel',release,true);
     feedback=document.createElement('div');feedback.className='mobile-touch-feedback '+key;
     document.getElementById('mobile-race-input').appendChild(feedback);
     if(key==='clutch'){const p=inputPoint(e);gesture={x:p.x,y:p.y};gShifted=false;}
     if(navigator.vibrate)navigator.vibrate(key==='accel'?10:14);
     move(e);
   });
-  el.addEventListener('pointermove',e=>{if(e.pointerId===pointerId)move(e);});
   const release=e=>{
     if(pointerId===null||e.pointerId!==pointerId)return;
-    padInput[key]=false;pointerId=null;e.preventDefault();e.stopPropagation();
+    stopTracking();padInput[key]=false;pointerId=null;if(e.cancelable)e.preventDefault();e.stopPropagation();
     if(key==='accel'){rightAccelHeld=false;mouse.r=false;accelLatchUntil=0;}
     if(feedback){feedback.remove();feedback=null;}
     if(key==='clutch'){
@@ -1121,9 +1128,6 @@ function bindMobileRaceZone(id,key){
       if(st){if(st.clutchGear!==st.gear){playShiftEffect(st);if(navigator.vibrate)navigator.vibrate(24);st.clutchGear=st.gear;}st.clutch=false;}
     }
   };
-  el.addEventListener('pointerup',release);
-  el.addEventListener('pointercancel',release);
-  el.addEventListener('lostpointercapture',release);
 }
 bindMobileRaceZone('mobile-clutch-zone','clutch');
 bindMobileRaceZone('mobile-accel-zone','accel');
@@ -1224,7 +1228,7 @@ async function doRace(){
     const begun=performance.now();
     while(true){
       syncCountdownInput();
-      if(raceAccelActive())return true;
+      if(raceAccelActive()&&(!pSt||pSt.gear!==0))return true;
       const elapsed=performance.now()-begun;
       const progress=Math.pow(CLAMP(elapsed/1000*3,0,1),2);
       sig.style.opacity=progress;sig.style.transform=`scale(${LERP(1.1,1,progress)})`;
