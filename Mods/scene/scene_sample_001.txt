@@ -1,29 +1,22 @@
 ﻿#top
 ,,サンプル一覧
-,,このサンプルを動かしているシーンファイルは<br>「Mods/scene」フォルダ内の「scene_sample_001.txt」です。
+,,このサンプルを動かしているシーンファイルは<br>「Mods/scene」フォルダ内の「scene_sample_001.txt」です
 
 #sample_select
 // 選択肢を表示
-SetPen,0.1,0.07
-SetPanel,,,◆サンプル,Left,,,,,0.8,
-SetPen,0.1,0.14
+SetPen,0.1,0.1
+SetPanel,,,◆サンプル,Left,,,,,0.78,
+SetPen,0.1,0.2
 SetPanel,Selectable,#sample_select1,画像・セリフ表示,Left,,,,,0.36,
-SetPen,0.1,0.23
 SetPanel,Selectable,#sample_select2,選択肢,Left,,,,,0.36,
-SetPen,0.1,0.32
-SetPanel,Selectable,#sample_select9,ランダム,Left,,,,,0.36,
-SetPen,0.1,0.41
 SetPanel,Selectable,#sample_select3,会話→レース,Left,,,,,0.36,
-SetPen,0.1,0.50
 SetPanel,Selectable,#sample_select4,速度チェック（バイク）,Left,,,,,0.36,
-SetPen,0.52,0.14
 SetPanel,Selectable,#sample_select5,速度チェック（クルマ）,Left,,,,,0.36,
-SetPen,0.52,0.23
+SetPen,0.52,0.2
 SetPanel,Selectable,#sample_select6,ショップ,Left,,,,,0.36,
-SetPen,0.52,0.32
 SetPanel,Selectable,#sample_select7,エフェクト,Left,,,,,0.36,
-SetPen,0.52,0.41
 SetPanel,Selectable,#sample_select8,エフェクト（レース）,Left,,,,,0.36,
+SetPanel,Selectable,#sample_select9,ランダム,Left,,,,,0.36,
 ,,みたいサンプルを選択してください
 Stop
 
@@ -34,10 +27,6 @@ Scene,scene_sample_010
 #sample_select2
 DisposelAllPanels
 Scene,scene_sample_020
-
-#sample_select9
-DisposelAllPanels
-Scene,scene_sample_025
 
 #sample_select3
 DisposelAllPanels
@@ -62,3 +51,9 @@ Scene,scene_sample_070
 #sample_select8
 DisposelAllPanels
 Scene,scene_sample_080
+
+
+#sample_select9
+DisposelAllPanels
+Scene,scene_sample_090
+

@@ -1,6 +1,6 @@
 ﻿#top
 ,,エフェクトを適用したレース画面のサンプルです
-,,このサンプルを動かしているシーンファイルは<br>「Mods/scene」フォルダ内の「scene_sample_080.txt」です。
+,,このサンプルを動かしているシーンファイルは<br>「Mods/scene」フォルダ内の「scene_sample_080.txt」です
 
 #effect_select
 SetPen,0.1,0.1
@@ -10,7 +10,7 @@ SetPanel,Selectable,#effect_select1,雨,Left,,,,,0.3,
 SetPanel,Selectable,#effect_select2,風,Left,,,,,0.3,
 SetPanel,Selectable,#effect_select3,霧,Left,,,,,0.3,
 SetPanel,Selectable,#effect_select4,なし,Left,,,,,0.3,
-,,レースエフェクトを選択してください<br>※エフェクト自体には、速度に影響を与える効果はありません。
+,,レースエフェクトを選択してください<br>※エフェクト自体には、速度に影響を与える効果はありません
 Stop
 
 // エフェクト「雨」の場合

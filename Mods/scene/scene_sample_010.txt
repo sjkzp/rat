@@ -39,7 +39,7 @@ SetBackground,blue
 // もう一度みるかの選択
 SetPen,0.1,0.1
 SetPanel,,,◆選択,Left,,,,,0.3,
-SetPen,0.12,0.17
+SetPen,0.12,0.2
 SetPanel,Selectable,#retry_select1,もう一度みる,Left,,,,,0.3,
 SetPanel,Selectable,#retry_select2,サンプル一覧に戻る,Left,,,,,0.3,
 ,,選択してください
