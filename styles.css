@@ -263,7 +263,7 @@ body.mobile-build .slot-savebtn,body.mobile-build .slot-loadbtn{height:40px;font
 body.mobile-build #saves-close{position:fixed;}
 
 body.mobile-build #race-controls .race-pad::after{
-  content:"";position:absolute;bottom:82px;width:118px;height:118px;border-radius:50%;
+  content:"";position:absolute;bottom:107px;width:118px;height:118px;border-radius:50%;
   border:2px solid rgba(255,255,255,.14);background:rgba(0,0,0,.05);
   box-shadow:inset 0 0 24px rgba(255,255,255,.04);transition:.12s ease;
 }
@@ -271,7 +271,7 @@ body.mobile-build #race-controls #pad-clutch::after{left:42px;}
 body.mobile-build #race-controls #pad-accel::after{right:72px;}
 body.mobile-build #race-controls .race-pad.active::after{border-color:rgba(255,255,255,.55);transform:scale(1.08);}
 body.mobile-build .touch-feedback.clutch{width:90px;height:90px;border-width:3px;background:rgba(66,130,220,.12);}
-body.mobile-build .touch-feedback.accel{width:210px;height:210px;border-width:3px;background:rgba(50,210,115,.12);}
+body.mobile-build .touch-feedback.accel{width:179px;height:179px;border-width:3px;background:rgba(50,210,115,.12);}
 
 #mobile-race-input{display:none;position:fixed;inset:0;z-index:9000;pointer-events:none;touch-action:none;}
 #mobile-race-input .mobile-race-zone{position:absolute;top:0;bottom:0;width:50%;touch-action:none;pointer-events:auto;}
@@ -282,7 +282,7 @@ body.mobile-build .touch-feedback.accel{width:210px;height:210px;border-width:3p
   transform:translate(-50%,-50%);pointer-events:none;animation:mobile-touch-in .16s ease-out both;
 }
 .mobile-touch-feedback.clutch{background:rgba(66,130,220,.14);box-shadow:0 0 24px rgba(66,130,220,.35);}
-.mobile-touch-feedback.accel{width:210px;height:210px;background:rgba(50,210,115,.13);box-shadow:0 0 30px rgba(50,210,115,.3);}
+.mobile-touch-feedback.accel{width:179px;height:179px;background:rgba(50,210,115,.13);box-shadow:0 0 30px rgba(50,210,115,.3);}
 @keyframes mobile-touch-in{from{opacity:0;transform:translate(-50%,-50%) scale(.72)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
 
 @media (pointer:coarse){
