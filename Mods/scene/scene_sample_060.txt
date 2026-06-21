@@ -12,14 +12,16 @@ SetValue,Money,30000
 
 #menu_panel
 DisposelAllPanels
-SetPen,0.35,0.3
-SetPanel,,,サイフ,Left,{%Money}円,Right,,#00003377,0.20,
-SetPen,0.2,0.37
-SetPanel,Selectable,#shop,バイクをチューンする,Left,,,,,0.35,
-SetPanel,Selectable,#delivery,ピザの配達をする,Left,,,,,0.35,
-SetPanel,Selectable,#race,レースに行く,Left,,,,,0.35,
-SetPen,0.35,0.60
-SetPanel,Selectable,#back_to_menu,サンプル一覧に戻る,Left,,,,,0.20,
+SetPen,0.3,0.20
+SetPanel,,,サイフ,Left,{%Money}円,Right,,#00003377,0.40,
+SetPen,0.16,0.31
+SetPanel,Selectable,#shop,バイクをチューンする,Left,,,,,0.44,
+SetPen,0.16,0.42
+SetPanel,Selectable,#delivery,ピザの配達をする,Left,,,,,0.44,
+SetPen,0.16,0.53
+SetPanel,Selectable,#race,レースに行く,Left,,,,,0.44,
+SetPen,0.62,0.53
+SetPanel,Selectable,#back_to_menu,サンプル一覧に戻る,Left,,,,,0.32,
 ,,メニューを選択
 Stop
 
@@ -78,22 +80,25 @@ Jump,#menu_panel
 
 #shop
 DisposelAllPanels
-SetPen,0.35,0.3
-SetPanel,,,サイフ,Left,{%Money}円,Right,,#00003377,0.20,
-SetPen,0.2,0.37
-SetPanel,Selectable,#shop_body_menu,ボディ,Left,,,,,0.35,
-SetPanel,Selectable,#shop_engine_menu,エンジン,Left,,,,,0.35,
-SetPanel,Selectable,#shop_mech_menu,その他,Left,,,,,0.35,
-SetPanel,Selectable,#shop_exit,戻る,Left,,,,,0.10,
+SetPen,0.1,0.12
+SetPanel,,,サイフ,Left,{%Money}円,Right,,#00003377,0.78,
+SetPen,0.1,0.23
+SetPanel,Selectable,#shop_body_menu,ボディ,Left,,,,,0.36,
+SetPen,0.1,0.34
+SetPanel,Selectable,#shop_engine_menu,エンジン,Left,,,,,0.36,
+SetPen,0.52,0.23
+SetPanel,Selectable,#shop_mech_menu,その他,Left,,,,,0.36,
+SetPen,0.52,0.34
+SetPanel,Selectable,#shop_exit,戻る,Left,,,,,0.36,
 ,,チューンの種類を選択
 Stop
 
 
 #shop_body_menu
 DisposelAllPanels
-SetPen,0.35,0.3
-SetPanel,,,サイフ,Left,{%Money}円,Right,,#00003377,0.20,
-SetPen,0.2,0.37
+SetPen,0.1,0.12
+SetPanel,,,サイフ,Left,{%Money}円,Right,,#00003377,0.78,
+SetPen,0.1,0.23
 
 
 // ボディメニューアイテム1つ目
@@ -101,7 +106,7 @@ SetPen,0.2,0.37
 CheckItem,PizzaWeightReduction1,#have_weight_reduction1
 
 // 持っていないなら通常表示
-SetPanel,Selectable,#get_weight_reduction1,ボディ軽量化 Lv1,Left,10000円,Right,,,0.35,
+SetPanel,Selectable,#get_weight_reduction1,ボディ軽量化 Lv1,Left,10000円,Right,,,0.36,
 Jump,#end_weight_reduction1
 
 // クリックされた時の処理
@@ -116,16 +121,17 @@ Jump,#shop_body_menu
 
 // すでに持っているなら押せないパネルにする
 #have_weight_reduction1
-SetPanel,SelectableNoBorder,,ボディ軽量化 Lv1,Left,,,,#666666ff,0.35,
+SetPanel,SelectableNoBorder,,ボディ軽量化 Lv1,Left,,,,#666666ff,0.36,
 
 // アイテム1つめの終わり
 #end_weight_reduction1
+SetPen,0.1,0.34
 
 
 // ボディメニューアイテム2つ目
 CheckItem,PizzaWeightReduction2,#have_weight_reduction2
 
-SetPanel,Selectable,#get_weight_reduction2,ボディ軽量化 Lv2,Left,13000円,Right,,,0.35,
+SetPanel,Selectable,#get_weight_reduction2,ボディ軽量化 Lv2,Left,13000円,Right,,,0.36,
 Jump,#end_weight_reduction2
 
 #get_weight_reduction2
@@ -137,15 +143,16 @@ SetItem,PizzaWeightReduction2,Target=Pizza,Weight=0.8
 Jump,#shop_body_menu
 
 #have_weight_reduction2
-SetPanel,SelectableNoBorder,,ボディ軽量化 Lv2,Left,,,,#666666ff,0.35,
+SetPanel,SelectableNoBorder,,ボディ軽量化 Lv2,Left,,,,#666666ff,0.36,
 
 #end_weight_reduction2
+SetPen,0.52,0.23
 
 
 // ボディメニューアイテム3つ目
 CheckItem,PizzaWeightReduction3,#have_weight_reduction3
 
-SetPanel,Selectable,#get_weight_reduction3,ボディ軽量化 Lv3,Left,25000円,Right,,,0.35,
+SetPanel,Selectable,#get_weight_reduction3,ボディ軽量化 Lv3,Left,25000円,Right,,,0.36,
 Jump,#end_weight_reduction3
 
 #get_weight_reduction3
@@ -157,12 +164,11 @@ SetItem,PizzaWeightReduction3,Target=Pizza,Weight=0.7
 Jump,#shop_body_menu
 
 #have_weight_reduction3
-SetPanel,SelectableNoBorder,,ボディ軽量化 Lv3,Left,,,,#666666ff,0.35,
+SetPanel,SelectableNoBorder,,ボディ軽量化 Lv3,Left,,,,#666666ff,0.36,
 
 #end_weight_reduction3
-
-
-SetPanel,Selectable,#shop,戻る,Left,,,,,0.10,
+SetPen,0.52,0.34
+SetPanel,Selectable,#shop,戻る,Left,,,,,0.36,
 ,,軽量化は重ね合わせて効果を発揮する
 Stop
 
@@ -174,14 +180,14 @@ Jump,#shop_body_menu
 
 #shop_engine_menu
 DisposelAllPanels
-SetPen,0.35,0.3
-SetPanel,,,サイフ,Left,{%Money}円,Right,,#00003377,0.20,
-SetPen,0.2,0.37
+SetPen,0.1,0.12
+SetPanel,,,サイフ,Left,{%Money}円,Right,,#00003377,0.78,
+SetPen,0.1,0.23
 
 
 CheckItem,PizzaEngine1,#have_engine1
 
-SetPanel,Selectable,#get_engine1,スーパーエンジン,Left,20000円,Right,,,0.35,
+SetPanel,Selectable,#get_engine1,スーパーエンジン,Left,20000円,Right,,,0.36,
 Jump,#end_engine1
 
 #get_engine1
@@ -196,14 +202,15 @@ SetItem,PizzaEngine1,Target=Pizza,Torque=1.5,MaxSpeed=1.5
 Jump,#shop_engine_menu
 
 #have_engine1
-SetPanel,SelectableNoBorder,,スーパーエンジン,Left,,,,#666666ff,0.35,
+SetPanel,SelectableNoBorder,,スーパーエンジン,Left,,,,#666666ff,0.36,
 
 #end_engine1
+SetPen,0.1,0.34
 
 
 CheckItem,PizzaEngine2,#have_engine2
 
-SetPanel,Selectable,#get_engine2,ハイパーエンジン,Left,40000円,Right,,,0.35,
+SetPanel,Selectable,#get_engine2,ハイパーエンジン,Left,40000円,Right,,,0.36,
 Jump,#end_engine2
 
 #get_engine2
@@ -217,14 +224,15 @@ SetItem,PizzaEngine2,Target=Pizza,Torque=2.0,MaxSpeed=2.0
 Jump,#shop_engine_menu
 
 #have_engine2
-SetPanel,SelectableNoBorder,,ハイパーエンジン,Left,,,,#666666ff,0.35,
+SetPanel,SelectableNoBorder,,ハイパーエンジン,Left,,,,#666666ff,0.36,
 
 #end_engine2
+SetPen,0.52,0.23
 
 
 CheckItem,PizzaEngine3,#have_engine3
 
-SetPanel,Selectable,#get_engine3,ウルトラエンジン,Left,80000円,Right,,,0.35,
+SetPanel,Selectable,#get_engine3,ウルトラエンジン,Left,80000円,Right,,,0.36,
 Jump,#end_engine3
 
 #get_engine3
@@ -238,12 +246,11 @@ SetItem,PizzaEngine3,Target=Pizza,Torque=3.2,MaxSpeed=3.2
 Jump,#shop_engine_menu
 
 #have_engine3
-SetPanel,SelectableNoBorder,,ウルトラエンジン,Left,,,,#666666ff,0.35,
+SetPanel,SelectableNoBorder,,ウルトラエンジン,Left,,,,#666666ff,0.36,
 
 #end_engine3
-
-
-SetPanel,Selectable,#shop,戻る,Left,,,,,0.10,
+SetPen,0.52,0.34
+SetPanel,Selectable,#shop,戻る,Left,,,,,0.36,
 ,,エンジンを積み替えて加速と最高速を上げる
 Stop
 
@@ -255,14 +262,14 @@ Jump,#shop_engine_menu
 
 #shop_mech_menu
 DisposelAllPanels
-SetPen,0.35,0.3
-SetPanel,,,サイフ,Left,{%Money}円,Right,,#00003377,0.20,
-SetPen,0.2,0.37
+SetPen,0.1,0.12
+SetPanel,,,サイフ,Left,{%Money}円,Right,,#00003377,0.78,
+SetPen,0.1,0.23
 
 
 CheckItem,MotorCycleGear5,#have_motorcycle_gear5
 
-SetPanel,Selectable,#get_motorcycle_gear5,バイク用5速ギア,Left,10000円,Right,,,0.35,
+SetPanel,Selectable,#get_motorcycle_gear5,バイク用5速ギア,Left,10000円,Right,,,0.36,
 Jump,#end_motorcycle_gear5
 
 #get_motorcycle_gear5
@@ -275,14 +282,15 @@ DeleteItem,CarGear
 Jump,#shop_mech_menu
 
 #have_motorcycle_gear5
-SetPanel,SelectableNoBorder,,バイク用5速ギア,Left,,,,#666666ff,0.35,
+SetPanel,SelectableNoBorder,,バイク用5速ギア,Left,,,,#666666ff,0.36,
 
 #end_motorcycle_gear5
+SetPen,0.1,0.34
 
 
 CheckItem,CarGear,#have_car_gear
 
-SetPanel,Selectable,#get_car_gear,クルマ用ギア,Left,10000円,Right,,,0.35,
+SetPanel,Selectable,#get_car_gear,クルマ用ギア,Left,10000円,Right,,,0.36,
 Jump,#end_car_gear
 
 #get_car_gear
@@ -295,11 +303,11 @@ DeleteItem,MotorCycleGear5
 Jump,#shop_mech_menu
 
 #have_car_gear
-SetPanel,SelectableNoBorder,,クルマ用ギア,Left,,,,#666666ff,0.35,
+SetPanel,SelectableNoBorder,,クルマ用ギア,Left,,,,#666666ff,0.36,
 
 #end_car_gear
-
-SetPanel,Selectable,#shop,戻る,Left,,,,,0.10,
+SetPen,0.52,0.23
+SetPanel,Selectable,#shop,戻る,Left,,,,,0.36,
 ,,バイク用とクルマ用のギアを切り替える
 Stop
 
