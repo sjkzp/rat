@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.37';
+const RAT_BROWSER_VERSION='2026.06.21.38';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -1351,7 +1351,7 @@ async function doRace(){
       const accel=!isP||raceAccelActive();
       if(isP){
         const cl=raceClutchActive();
-        if(cl&&!st.clutch){st.clutchGear=st.gear;gesture&&(gesture={x:mouse.x,y:mouse.y});gShifted=false;}
+        if(cl&&!st.clutch){st.clutchGear=st.gear;if(!gesture)gesture={x:mouse.x,y:mouse.y};gShifted=false;}
         if(!cl&&st.clutch&&st.clutchGear!==st.gear)playShiftEffect(st);
         st.clutch=cl;
         updateGearHUD(st,gearImg);
