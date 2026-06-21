@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RACER IMAGE CONVERTER</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -24,7 +25,9 @@ h1 {
   color: #a07850;
   margin-bottom: 22px;
 }
-.upload-grid {
+
+/* ========== PC レイアウト（デフォルト）========== */
+.upload-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
@@ -49,6 +52,15 @@ h1 {
 .drop-zone:hover { border-color: #8b4513; background: #fff8ee; }
 .drop-zone.dragover { border-color: #d46000; background: #fff3e0; }
 .drop-zone.loaded { border-color: #5a8a3c; background: #f4fbed; }
+.prev-canvas {
+  max-width: 100%;
+  max-height: 72px;
+  image-rendering: pixelated;
+  border: 1px solid #d0c0a0;
+  background: repeating-conic-gradient(#ddd 0% 25%, #f0ece4 0% 50%) 0 0 / 8px 8px;
+  border-radius: 4px;
+}
+.zone-info { width: 100%; }
 .slot-name {
   font-size: 0.85rem;
   font-weight: 700;
@@ -58,14 +70,6 @@ h1 {
   font-size: 0.66rem;
   color: #b08060;
   line-height: 1.4;
-}
-.prev-canvas {
-  max-width: 100%;
-  max-height: 72px;
-  image-rendering: pixelated;
-  border: 1px solid #d0c0a0;
-  background: repeating-conic-gradient(#ddd 0% 25%, #f0ece4 0% 50%) 0 0 / 8px 8px;
-  border-radius: 4px;
 }
 .filename {
   font-size: 0.65rem;
@@ -80,6 +84,7 @@ h1 {
   cursor: pointer;
   opacity: 0;
 }
+
 .settings {
   background: #fffdf7;
   border: 1px solid #d0c0a0;
@@ -91,21 +96,28 @@ h1 {
   gap: 22px;
   flex-wrap: wrap;
 }
-.settings label {
-  font-size: 0.75rem;
-  color: #6a5040;
+.setting-row {
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.settings input[type=range] { width: 90px; accent-color: #8b4513; }
-.settings span.val { font-size: 0.78rem; color: #8b4513; font-weight: 700; min-width: 22px; }
-.color-swatch {
-  width: 22px; height: 22px;
+.setting-row .label { font-size: 0.75rem; color: #6a5040; }
+.setting-row input[type=range] { width: 90px; accent-color: #8b4513; }
+.setting-row .val {
+  font-size: 0.78rem;
+  color: #8b4513;
+  font-weight: 700;
+  min-width: 38px;
+}
+.setting-row input[type=color] {
+  width: 28px; height: 28px;
   border: 2px solid #c8a878;
   border-radius: 4px;
   cursor: pointer;
+  padding: 1px;
+  background: none;
 }
+
 .actions { display: flex; gap: 10px; margin-bottom: 18px; }
 .btn {
   padding: 9px 22px;
@@ -122,11 +134,13 @@ h1 {
 .btn:not(:disabled):active { transform: scale(0.97); }
 .btn-convert { background: #c87820; color: #fff; }
 .btn-dl      { background: #5a8a3c; color: #fff; }
+
 .preview-wrap {
   background: #fffdf7;
   border: 1px solid #d0c0a0;
   border-radius: 10px;
   padding: 14px;
+  margin-bottom: 20px;
 }
 .preview-wrap h2 { font-size: 0.8rem; color: #a07850; margin-bottom: 10px; }
 #outputCanvas {
@@ -139,6 +153,55 @@ h1 {
 }
 .status { font-size: 0.72rem; margin-top: 8px; min-height: 1.1em; color: #c04000; }
 .status.ok { color: #3a7a20; }
+.rat-link { font-size: 0.75rem; color: #a07850; padding-bottom: 12px; }
+.rat-link a { color: #8b4513; font-weight: 700; }
+
+/* ========== スマホ レイアウト ========== */
+@media (max-width: 600px) {
+  body { padding: 14px; }
+
+  .upload-list {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .drop-zone {
+    flex-direction: row;
+    text-align: left;
+    min-height: 68px;
+    padding: 12px 14px;
+    gap: 12px;
+    justify-content: flex-start;
+  }
+  .prev-canvas {
+    width: 72px !important;
+    height: 48px !important;
+    max-height: 48px;
+    flex-shrink: 0;
+  }
+  .zone-info { flex: 1; min-width: 0; }
+  .slot-desc { display: none; }
+  .hint { display: none; }
+  .filename { font-size: 0.68rem; margin-top: 3px; }
+
+  .settings {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+  .setting-row { gap: 10px; }
+  .setting-row .label { width: 56px; flex-shrink: 0; }
+  .setting-row input[type=range] { flex: 1; width: auto; height: 28px; }
+  .setting-row input[type=color] { width: 44px; height: 36px; }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .btn { padding: 14px 10px; font-size: 0.95rem; width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -146,65 +209,70 @@ h1 {
 <h1>🏁 RACER IMAGE CONVERTER</h1>
 <p class="subtitle">画像3枚 → 透過PNG スプライトシート生成</p>
 
-<div class="upload-grid">
+<div class="upload-list">
   <div class="drop-zone" id="zone0">
-    <div class="slot-name">1枚目</div>
-    <div class="slot-desc">① 左上 ＋ ② 右上<br>左右に並べて配置</div>
     <canvas class="prev-canvas" id="prev0" width="140" height="60"></canvas>
-    <div class="filename" id="name0">未選択</div>
-    <div class="hint">ドロップ または クリック</div>
+    <div class="zone-info">
+      <div class="slot-name">1枚目</div>
+      <div class="slot-desc">① 左上 ＋ ② 右上に配置</div>
+      <div class="filename" id="name0">クリック または ドロップ</div>
+    </div>
     <input type="file" id="file0" accept=".bmp,image/*" style="display:none">
     <label class="zone-click" for="file0"></label>
   </div>
   <div class="drop-zone" id="zone1">
-    <div class="slot-name">2枚目</div>
-    <div class="slot-desc">③ ②の直下<br>右列2段目に配置</div>
     <canvas class="prev-canvas" id="prev1" width="140" height="60"></canvas>
-    <div class="filename" id="name1">未選択</div>
-    <div class="hint">ドロップ または クリック</div>
+    <div class="zone-info">
+      <div class="slot-name">2枚目</div>
+      <div class="slot-desc">③ ②の直下に配置</div>
+      <div class="filename" id="name1">クリック または ドロップ</div>
+    </div>
     <input type="file" id="file1" accept=".bmp,image/*" style="display:none">
     <label class="zone-click" for="file1"></label>
   </div>
   <div class="drop-zone" id="zone2">
-    <div class="slot-name">3枚目</div>
-    <div class="slot-desc">④ ③の直下<br>右列3段目に配置</div>
     <canvas class="prev-canvas" id="prev2" width="140" height="60"></canvas>
-    <div class="filename" id="name2">未選択</div>
-    <div class="hint">ドロップ または クリック</div>
+    <div class="zone-info">
+      <div class="slot-name">3枚目</div>
+      <div class="slot-desc">④ ③の直下に配置</div>
+      <div class="filename" id="name2">クリック または ドロップ</div>
+    </div>
     <input type="file" id="file2" accept=".bmp,image/*" style="display:none">
     <label class="zone-click" for="file2"></label>
   </div>
 </div>
 
 <div class="settings">
-  <label>
-    倍率:
+  <div class="setting-row">
+    <span class="label">倍率</span>
     <input type="range" id="scale" min="10" max="50" value="10" step="1">
     <span class="val" id="scaleVal">×1.0</span>
-  </label>
-</div>
-<div class="settings">
-  <label>
-    背景色:
+  </div>
+  <div class="setting-row">
+    <span class="label">背景色</span>
     <input type="color" id="bgColor" value="#2b8585">
-    <span class="color-swatch" id="colorSwatch" style="background:#2b8585"></span>
-  </label>
-  <label>
-    許容誤差:
+  </div>
+  <div class="setting-row">
+    <span class="label">許容誤差</span>
     <input type="range" id="tolerance" min="1" max="80" value="25">
     <span class="val" id="tolVal">25</span>
-  </label>
+  </div>
 </div>
 
 <div class="actions">
   <button class="btn btn-convert" id="btnConvert" disabled>変換</button>
-  <button class="btn btn-dl" id="btnDl" disabled>PNGダウンロード</button>
+  <button class="btn btn-dl" id="btnDl" disabled>PNG保存</button>
 </div>
 
 <div class="preview-wrap">
   <h2 id="canvasInfo">出力プレビュー</h2>
   <canvas id="outputCanvas" width="400" height="200"></canvas>
   <div class="status" id="status"></div>
+</div>
+
+<div class="rat-link">
+  ▼レースアドベンチャーゲーム制作ツール「RAT」<br>
+  <a href="https://prjrat.wixsite.com/main" target="_blank">https://prjrat.wixsite.com/main</a>
 </div>
 
 <script>
@@ -215,7 +283,6 @@ const outputCtx = outputCanvas.getContext('2d');
 for (let i = 0; i < 3; i++) {
   const zone = document.getElementById(`zone${i}`);
   const fileInput = document.getElementById(`file${i}`);
-
   fileInput.addEventListener('change', e => {
     if (e.target.files[0]) handleFile(e.target.files[0], i);
     e.target.value = '';
@@ -232,9 +299,6 @@ for (let i = 0; i < 3; i++) {
 document.getElementById('scale').addEventListener('input', e => {
   document.getElementById('scaleVal').textContent = '×' + (parseInt(e.target.value) / 10).toFixed(1);
 });
-document.getElementById('bgColor').addEventListener('input', e => {
-  document.getElementById('colorSwatch').style.background = e.target.value;
-});
 document.getElementById('tolerance').addEventListener('input', e => {
   document.getElementById('tolVal').textContent = e.target.value;
 });
@@ -250,8 +314,8 @@ function handleFile(file, idx) {
       const pv = document.getElementById(`prev${idx}`);
       const ctx = pv.getContext('2d');
       ctx.clearRect(0, 0, pv.width, pv.height);
-      const scale = Math.min(pv.width / img.width, pv.height / img.height);
-      const dw = img.width * scale, dh = img.height * scale;
+      const s = Math.min(pv.width / img.width, pv.height / img.height);
+      const dw = img.width * s, dh = img.height * s;
       ctx.drawImage(img, (pv.width - dw) / 2, (pv.height - dh) / 2, dw, dh);
       document.getElementById(`name${idx}`).textContent = file.name;
       document.getElementById(`zone${idx}`).classList.add('loaded');
@@ -311,7 +375,7 @@ function convert() {
   document.getElementById('canvasInfo').textContent = `出力プレビュー (${w} × ${h} px)`;
   document.getElementById('btnDl').disabled = false;
   const st = document.getElementById('status');
-  st.textContent = `✓ 変換完了 — ${w}×${h}px / 倍率 ×${scale.toFixed(1)} / 許容誤差 ${tol}`;
+  st.textContent = `✓ 変換完了 — ${w}×${h}px / ×${scale.toFixed(1)} / 誤差${tol}`;
   st.className = 'status ok';
 }
 
@@ -322,10 +386,5 @@ function download() {
   link.click();
 }
 </script>
-<div style="margin-top:28px; font-size:0.75rem; color:#a07850;">
-  ▼レースアドベンチャーゲーム制作ツール「RAT」<br>
-  <a href="https://prjrat.wixsite.com/main" target="_blank" style="color:#8b4513; font-weight:700;">https://prjrat.wixsite.com/main</a>
-</div>
-
 </body>
 </html>
