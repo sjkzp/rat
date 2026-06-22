@@ -60,7 +60,7 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 #title{position:absolute;top:0;left:0;width:960px;height:540px;z-index:25;background:#000;}
 #title-bg{position:absolute;top:0;left:0;width:960px;height:540px;object-fit:cover;}
 #title-btns{position:absolute;right:130px;top:355px;display:flex;flex-direction:column;gap:6px;}
-.tbtn{width:160px;height:30px;background:#f0f0f0;color:#222;border:none;font-size:16px;font-family:inherit;cursor:pointer;}
+.tbtn{width:160px;height:30px;background:#f0f0f0;color:#222;border:none;font-size:20px;font-family:inherit;cursor:pointer;}
 .tbtn:hover{background:#ddd;}
 .tbtn:disabled{background:#666;color:#aaa;cursor:not-allowed;}
 #title-status{position:absolute;left:0;bottom:16px;width:960px;text-align:center;font-size:14px;color:#fff;}
@@ -202,7 +202,7 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
   #util{right:8px;bottom:8px;gap:5px;}
   .ubtn{width:40px;height:40px;}
   .ubtn img{width:26px;height:26px;}
-  .tbtn{height:38px;font-size:17px;}
+  .tbtn{height:38px;font-size:21px;}
   #title-btns{gap:8px;}
 }
 
@@ -214,7 +214,7 @@ body.mobile-build #stage{overflow:clip;}
 body.mobile-build button,body.mobile-build input{touch-action:manipulation;}
 body.mobile-build #title-btns{right:64px;top:300px;gap:10px;}
 body.mobile-build .tbtn{
-  width:330px;height:50px;font-size:19px;font-weight:700;
+  width:330px;height:50px;font-size:24px;font-weight:700;
   background:rgba(244,246,248,.94);
   box-shadow:0 6px 18px rgba(0,0,0,.3);
 }

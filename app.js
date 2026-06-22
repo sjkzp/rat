@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.48';
+const RAT_BROWSER_VERSION='2026.06.21.49';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -770,6 +770,7 @@ async function execCmd(line){
       const cx=penX, cy=penY;
       panelRecords.push({rawSel,target,label,a1,sub:sub2,a2,bg,w,h,cx,cy});
       addPanel(label,a1,sub2,a2,bg,w,h,sel,noBorder,cx,cy,()=>{
+        if(!target)return;
         clearPanels(); jumpTo(target); run();
       });
       penY+=PH/540+.005;
