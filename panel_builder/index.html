@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAT PANEL BUILDER</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="header">
+  <h1>RAT PANEL BUILDER</h1>
+  <div class="sp"></div>
+</div>
+
+<div id="toolbar">
+  <div class="tb-row">
+    <span class="lbl">機能</span>
+    <select id="tb-func">
+      <option value="">— 表示のみ —</option>
+      <option value="Selectable" selected>Selectable</option>
+      <option value="SelectableNoBorder">SelectableNoBorder</option>
+    </select>
+    <div class="sep"></div>
+    <span class="lbl">文字1</span>
+    <input type="text" id="tb-text1" value="選択肢" style="width:90px">
+    <span class="lbl">文字揃え</span>
+    <select id="tb-align1">
+      <option selected>Left</option><option>Center</option><option>Right</option>
+    </select>
+    <span class="lbl">文字2</span>
+    <input type="text" id="tb-text2" placeholder="(省略可)" style="width:80px">
+    <div class="sep"></div>
+    <span class="lbl">色</span>
+    <input type="color" id="tb-bgcolor" value="#223355">
+    <span class="lbl">不透明度</span>
+    <input type="range" id="tb-alpha" min="0" max="255" value="210" style="width:60px">
+    <div class="sep"></div>
+    <span class="lbl">アンカー</span>
+    <input type="text" id="tb-anchor" placeholder="#tag" style="width:70px">
+  </div>
+  <div class="tb-row">
+    <button id="btn-undo" disabled title="Ctrl+Z">↩ UNDO</button>
+    <button id="btn-redo" disabled title="Ctrl+Y">↪ REDO</button>
+    <div class="sep"></div>
+    <button id="btn-add"         class="btn-primary">＋ 追加</button>
+    <button id="btn-copy-panel"                     >⎘ コピー</button>
+    <button id="btn-paste-panel" disabled           >⎙ 貼付け</button>
+    <button id="btn-del"         class="btn-danger" >✕ 削除</button>
+    <button id="btn-clear"       class="btn-danger" >⊘ 全削除</button>
+    <div class="sep"></div>
+    <button id="btn-load-bg"     class="btn-gold"   >🖼 背景画像</button>
+    <input  type="file" id="file-bg" accept="image/*">
+    <button id="btn-clear-bg"    class="btn-danger" style="display:none">✕ 背景削除</button>
+  </div>
+</div>
+
+<div id="canvas-container">
+  <div id="canvas-wrap">
+    <img id="canvas-bg-img" style="display:none" alt="">
+    <svg id="grid-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    <svg id="snap-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</div>
+
+<div id="props-bar">
+  <span class="lbl" style="color:var(--text3)">— パネルを選択してプロパティ編集 &nbsp;|&nbsp; Ctrl+C コピー &nbsp; Ctrl+V 貼付け &nbsp; Delete 削除 &nbsp; Ctrl+Z Undo &nbsp; Ctrl+Y Redo —</span>
+</div>
+
+<div id="output-section">
+  <div class="out-hdr">
+    <span class="out-title">▶ SCENE OUTPUT  <button id="btn-copy-scene" class="btn-gold">⎘ コピー</button>
+</span>
+  </div>
+  <textarea id="scene-output" readonly spellcheck="false"></textarea>
+</div>
+
+<div id="footer">
+  <span>RAT PANEL BUILDER</span>
+  <span><a href="https://prjrat.wixsite.com/main" target="_blank">RAT公式</a></span>
+</div>
+
+<div id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
