@@ -396,12 +396,12 @@ function showProps() {
     btnCopyP.disabled=true; btnDel.disabled=true; return;
   }
   btnCopyP.disabled=false; btnDel.disabled=false;
-  const sel=(id,opts,val)=>`<select id="${id}">${opts.map(o=>`<option${o===val?' selected':''}>${o}</option>`).join('')}</select>`;
+  const sel=(id,opts,val)=>`<select id="${id}">${opts.map(o=>`<option value="${o}"${o===val?' selected':''}>${o || '- 表示のみ -'}</option>`).join('')}</select>`;
   propsBar.innerHTML=`
-    <span class="lbl">位置X</span><input type="number" id="pp-x" value="${p.x.toFixed(3)}" step="0.005" min="0" max="1" style="width:62px">
-    <span class="lbl">位置Y</span><input type="number" id="pp-y" value="${p.y.toFixed(3)}" step="0.005" min="0" max="1" style="width:62px">
-    <span class="lbl">幅W</span><input type="number" id="pp-w" value="${p.w.toFixed(3)}" step="0.005" min="0.01" max="1" style="width:62px">
-    <span class="lbl">高H</span><input type="number" id="pp-h" value="${p.h.toFixed(3)}" step="0.005" min="0.01" max="1" style="width:62px">
+    <span class="lbl">位置X</span><input type="number" id="pp-x" value="${p.x.toFixed(3)}" step="0.005" min="0" max="1" style="width:80px">
+    <span class="lbl">位置Y</span><input type="number" id="pp-y" value="${p.y.toFixed(3)}" step="0.005" min="0" max="1" style="width:80px">
+    <span class="lbl">幅W</span><input type="number" id="pp-w" value="${p.w.toFixed(3)}" step="0.005" min="0.01" max="1" style="width:80px">
+    <span class="lbl">高H</span><input type="number" id="pp-h" value="${p.h.toFixed(3)}" step="0.005" min="0.01" max="1" style="width:80px">
     <div class="sep"></div>
     <span class="lbl">機能</span>${sel('pp-func',['','Selectable','SelectableNoBorder'],p.func)}
     <span class="lbl">アンカー</span><input type="text" id="pp-anchor" value="${p.anchor}" placeholder="#tag" style="width:64px">
@@ -512,7 +512,10 @@ function pastePanel() {
 
 // ── MAKE PANEL ──
 function makePanel(x,y) {
-  return { id:++idCounter, x, y, w:DW, h:DH,
+  const selectedPanel = panels.find(panel => panel.id === selectedId);
+  return { id:++idCounter, x, y,
+    w: selectedPanel ? selectedPanel.w : DW,
+    h: selectedPanel ? selectedPanel.h : DH,
     func:   document.getElementById('tb-func').value,
     text1:  document.getElementById('tb-text1').value||'',
     align1: document.getElementById('tb-align1').value,
@@ -555,7 +558,10 @@ document.getElementById('btn-add').addEventListener('click',()=>{
   const last=panels.length?panels[panels.length-1]:null;
   const nx=last?last.x:0.12;
   const ny=last?Math.min(0.88,last.y+last.h+0.02):0.21;
-  const p=makePanel(nx,ny); panels.push(p); selectedId=p.id;
+  const p=makePanel(nx,ny);
+  p.x=Math.max(0, Math.min(1-p.w, p.x));
+  p.y=Math.max(0, Math.min(1-p.h, p.y));
+  panels.push(p); selectedId=p.id;
   renderAll(); showProps();
 });
 document.getElementById('btn-copy-panel').addEventListener('click',copySelected);
