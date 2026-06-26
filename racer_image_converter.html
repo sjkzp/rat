@@ -296,8 +296,22 @@ for (let i = 0; i < 3; i++) {
   });
 }
 
-document.getElementById('scale').addEventListener('input', e => {
-  document.getElementById('scaleVal').textContent = '×' + (parseInt(e.target.value) / 10).toFixed(1);
+const scaleInput = document.getElementById('scale');
+const scaleStops = [20, 30, 40]; // ×2.0, ×3.0, ×4.0
+let previousScaleValue = parseInt(scaleInput.value);
+
+scaleInput.addEventListener('input', e => {
+  const requestedValue = parseInt(e.target.value);
+  const stopValue = scaleStops.find(value =>
+    (previousScaleValue < value && requestedValue >= value) ||
+    (previousScaleValue > value && requestedValue <= value)
+  );
+
+  // 倍率の節目をまたぐ際は、いったんその倍率で止める。
+  const scaleValue = stopValue ?? requestedValue;
+  e.target.value = scaleValue;
+  previousScaleValue = scaleValue;
+  document.getElementById('scaleVal').textContent = '×' + (scaleValue / 10).toFixed(1);
 });
 document.getElementById('tolerance').addEventListener('input', e => {
   document.getElementById('tolVal').textContent = e.target.value;
