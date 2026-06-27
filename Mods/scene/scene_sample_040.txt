@@ -1,8 +1,33 @@
-﻿#top
-,,速度チェック（バイク）用のサンプルです
+#top
+,,速度チェックのサンプルです
 ,,このサンプルを動かしているシーンファイルは<br>「Mods/scene」フォルダ内の「scene_sample_040.txt」です
 
+#vehicle_select
+SetPen,0.1,0.1
+SetPanel,,,◆速度チェック,Left,,,,,0.78,
+SetPen,0.1,0.2
+SetPanel,Selectable,#vehicle_bike,バイクで走る,Left,,,,,0.36,
+SetPanel,Selectable,#vehicle_car,クルマで走る,Left,,,,,0.36,
+SetPanel,Selectable,#vehicle_back,サンプル一覧に戻る,Left,,,,,0.36,
+,,走らせる車両を選択してください
+Stop
+
+#vehicle_bike
+DisposelAllPanels
+SetValue,vehicle_type,1
+Jump,#select1_panels
+
+#vehicle_car
+DisposelAllPanels
+SetValue,vehicle_type,2
+Jump,#select1_panels
+
+#vehicle_back
+DisposelAllPanels
+Scene,scene_sample_001
+
 #select1_panels
+DisposelAllPanels
 SetPen,0.1,0.1
 SetPanel,,,◆プレイヤーの基本速度,Left,,,,,0.78,
 SetPen,0.1,0.2
@@ -127,7 +152,6 @@ SetPanel,Selectable,#select3_9,シフトチェンジ時間 3.0,Left,,,,,0.36,
 ,,CPUのシフトチェンジ時間は？<br>※CPUがシフトチェンジする時の所要時間
 Stop
 
-
 #select3_1
 SetValue,cpu_shift_time,0.1
 Jump,#racer_setting
@@ -173,13 +197,32 @@ ClearPortrait
 WipeIn,AroundToCenter
 SetItem,ItemA,,Gear1=1.0,Gear2=1.0,Gear3=1.0,Gear4=1.0,Gear5=1.0,Gear6=1.0
 SetItem,ItemB,,GearRatio=1.0,Torque=1.0,Weight=1.0
+CheckValue,vehicle_type,==,1,#bike_setting
+Jump,#car_setting
+
+#bike_setting
 SetRacer,EVR_TYPE_D,1,1.0,3,0.06,0.20,0.60,Standard,MotorCycle5,{%cpu_base_spec},{%cpu_shift_time}
 SetRacer,Pizza,1,1.0,3,0.06,0.20,0.45,Player,MotorCycle5,{%player_base_spec},0
+SetValue,race_bg,1
+Jump,#race
+
+#car_setting
+SetRacer,truck,1,1.0,3,0.06,0.22,0.62,Standard,Car5,{%cpu_base_spec},{%cpu_shift_time}
+SetRacer,truck,1,1.0,3,0.06,0.20,0.42,Player,Car5,{%player_base_spec},0
+SetValue,race_bg,2
 Jump,#race
 
 #race
+CheckValue,race_bg,==,2,#race_car_bg
 SetBackground,race_sky_day
 SetRaceBackground,race_road,race_city
+Jump,#race_start
+
+#race_car_bg
+SetBackground,race_sky_night
+SetRaceBackground,race_road_wline,race_city
+
+#race_start
 SetBGM,race
 RaceSetup,400,#race_win,#race_lose
 WipeOut,AroundToCenter
@@ -209,7 +252,6 @@ SetBGM,mute
 WipeOut,RightToLeft
 Jump,#retry_select
 
-// もう一度レースするかの選択
 #retry_select
 SetPen,0.1,0.1
 SetPanel,,,◆選択,Left,,,,,0.3,

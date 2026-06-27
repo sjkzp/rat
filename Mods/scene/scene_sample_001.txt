@@ -10,13 +10,13 @@ SetPen,0.1,0.2
 SetPanel,Selectable,#sample_select1,画像・セリフ表示,Left,,,,,0.36,
 SetPanel,Selectable,#sample_select2,選択肢,Left,,,,,0.36,
 SetPanel,Selectable,#sample_select3,会話→レース,Left,,,,,0.36,
-SetPanel,Selectable,#sample_select4,速度チェック（バイク）,Left,,,,,0.36,
-SetPanel,Selectable,#sample_select5,速度チェック（クルマ）,Left,,,,,0.36,
+SetPanel,Selectable,#sample_select4,速度チェック,Left,,,,,0.36,
+SetPanel,Selectable,#sample_select5,ショップ,Left,,,,,0.36,
 SetPen,0.52,0.2
-SetPanel,Selectable,#sample_select6,ショップ,Left,,,,,0.36,
-SetPanel,Selectable,#sample_select7,エフェクト,Left,,,,,0.36,
-SetPanel,Selectable,#sample_select8,エフェクト（レース）,Left,,,,,0.36,
-SetPanel,Selectable,#sample_select9,ランダム,Left,,,,,0.36,
+SetPanel,Selectable,#sample_select6,エフェクト,Left,,,,,0.36,
+SetPanel,Selectable,#sample_select7,ランダム,Left,,,,,0.36,
+SetPanel,Selectable,#sample_select8,ニトロ,Left,,,,,0.36,
+SetPanel,Selectable,#sample_select9,フォント・メッセージウィンドウ,Left,,,,,0.36,
 ,,みたいサンプルを選択してください
 Stop
 
@@ -38,22 +38,21 @@ Scene,scene_sample_040
 
 #sample_select5
 DisposelAllPanels
-Scene,scene_sample_050
+Scene,scene_sample_060
 
 #sample_select6
 DisposelAllPanels
-Scene,scene_sample_060
+Scene,scene_sample_070
 
 #sample_select7
 DisposelAllPanels
-Scene,scene_sample_070
+Scene,scene_sample_090
 
 #sample_select8
 DisposelAllPanels
-Scene,scene_sample_080
-
+Scene,scene_sample_100
 
 #sample_select9
 DisposelAllPanels
-Scene,scene_sample_090
+Scene,scene_sample_110
 

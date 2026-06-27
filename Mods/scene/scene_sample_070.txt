@@ -1,53 +1,139 @@
-﻿#top
-// 文字を表示
-,,エフェクトサンプル
+#top
+,,エフェクトサンプルです
 ,,このサンプルを動かしているシーンファイルは<br>「Mods/scene」フォルダ内の「scene_sample_070.txt」です
-,,エフェクトは「Mods/effect」フォルダ内の画像を参照しており、<br>デフォルトでは「雨」「風」「霧」の3種類があります
+,,エフェクトは「Mods/effect」フォルダ内の画像を参照しており、<br>会話画面にもレース画面にも表示できます
 
-// 背景表示
+#effect_mode_select
+SetPen,0.1,0.1
+SetPanel,,,◆エフェクト,Left,,,,,0.78,
+SetPen,0.1,0.2
+SetPanel,Selectable,#talk_effect_top,会話画面でみる,Left,,,,,0.36,
+SetPanel,Selectable,#race_effect_top,レース画面でみる,Left,,,,,0.36,
+SetPanel,Selectable,#effect_back,サンプル一覧に戻る,Left,,,,,0.36,
+,,見たいサンプルを選択してください
+Stop
+
+#effect_back
+DisposelAllPanels
+Scene,scene_sample_001
+
+#talk_effect_top
+DisposelAllPanels
 SetBackground,bg_A
-
-,,エフェクト（雨）を設定します
-
-// エフェクト（雨）を設定
+,,まずは会話画面に雨のエフェクトを設定します
 SetEffect,rain,0,0.3,1.2,0.3,0.2
-
 ,,エフェクト（雨）を設定しました
-,,エフェクト（雨）の強さを変更します
-
-// エフェクトを解除
+,,次に雨の強さを変更します
 ClearEffect
-// エフェクト（雨）を設定
 SetEffect,rain,0,1.0,2.4,0.3,0.2
-
 ,,エフェクト（雨）の強さを変更しました
-,,エフェクト（風）を設定します
-
-// エフェクトを解除
+,,次に風のエフェクトを設定します
 ClearEffect
-// エフェクト（風）を設定
 SetEffect,wind,0.3,1.3,0,1.0,0.2
-
 ,,エフェクト（風）を設定しました
-,,エフェクト（霧）を設定します
-
-// エフェクトを解除
+,,次に霧のエフェクトを設定します
 ClearEffect
-// エフェクト（霧）を設定
 SetEffect,fog,0,-0.05,0.1,1.0,1.0
-
 ,,エフェクト（霧）を設定しました
-,,エフェクトを解除します
-
-// エフェクトを解除
+,,最後にエフェクトを解除します
 ClearEffect
-
 ,,エフェクトを解除しました
-
-// 背景をクリア
 SetBackground,blue
+Jump,#retry_select
 
-// もう一度みるかの選択
+#race_effect_top
+DisposelAllPanels
+SetPen,0.1,0.1
+SetPanel,,,◆レースエフェクト,Left,,,,,0.3,
+SetPen,0.12,0.17
+SetPanel,Selectable,#effect_select1,雨,Left,,,,,0.3,
+SetPanel,Selectable,#effect_select2,風,Left,,,,,0.3,
+SetPanel,Selectable,#effect_select3,霧,Left,,,,,0.3,
+SetPanel,Selectable,#effect_select4,なし,Left,,,,,0.3,
+,,レースエフェクトを選択してください<br>※エフェクト自体には、速度に影響を与える効果はありません
+Stop
+
+#effect_select1
+SetValue,race_effect,1
+Jump,#racer_setting
+
+#effect_select2
+SetValue,race_effect,2
+Jump,#racer_setting
+
+#effect_select3
+SetValue,race_effect,3
+Jump,#racer_setting
+
+#effect_select4
+SetValue,race_effect,4
+Jump,#racer_setting
+
+#racer_setting
+DisposelAllPanels
+ClearPortrait
+【レース操作方法① PC操作】,,アクセル：マウス右ボタン / Zキー<br>クラッチ：マウス左ボタン / Shiftキー
+【レース操作方法② PC操作】,,シフト操作（マウスの場合）：クラッチを押したままマウスジェスチャー<br>シフト操作（キーボードの場合）：クラッチを押したまま矢印キーで変更
+【レース操作方法③ スマホ操作】,,シフト操作：画面左半分を押してスワイプしてシフト<br>アクセル：画面右半分を押し続ける
+WipeIn,AroundToCenter
+SetItem,ItemA,,Gear1=1.0,Gear2=1.0,Gear3=1.0,Gear4=1.0,Gear5=1.0,Gear6=1.0
+SetItem,ItemB,,GearRatio=1.0,Torque=1.0,Weight=1.0
+SetRacer,EVR_TYPE_S,1,1.0,3,0.06,0.20,0.60,Standard,MotorCycle5,2.7,0.4
+SetRacer,Pizza,1,1.0,3,0.06,0.20,0.45,Player,MotorCycle5,2.5,0
+CheckValue,race_effect,==,1,#set_effect1
+CheckValue,race_effect,==,2,#set_effect2
+CheckValue,race_effect,==,3,#set_effect3
+CheckValue,race_effect,==,4,#set_effect4
+
+#set_effect1
+SetEffect,rain,0,0.3,1.2,0.3,0.2
+Jump,#race
+
+#set_effect2
+SetEffect,wind,0.3,1.3,0,1.0,0.2
+Jump,#race
+
+#set_effect3
+SetEffect,fog,0,-0.05,0.1,1.0,1.0
+Jump,#race
+
+#set_effect4
+ClearEffect
+Jump,#race
+
+#race
+SetBackground,race_sky_day
+SetRaceBackground,race_road,race_city
+SetBGM,race
+RaceSetup,400,#race_win,#race_lose
+WipeOut,AroundToCenter
+RaceStart
+
+#race_win
+,,勝ちました
+WipeIn,LeftToRight
+ClearRacer
+ClearEffect
+ClearItem
+SetBackground
+SetRaceBackground
+SetBGM,mute
+WipeOut,RightToLeft
+Jump,#retry_select
+
+#race_lose
+,,負けました
+WipeIn,LeftToRight
+ClearRacer
+ClearEffect
+ClearItem
+SetBackground
+SetRaceBackground
+SetBGM,mute
+WipeOut,RightToLeft
+Jump,#retry_select
+
+#retry_select
 SetPen,0.1,0.1
 SetPanel,,,◆選択,Left,,,,,0.3,
 SetPen,0.12,0.17
