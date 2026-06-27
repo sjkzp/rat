@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.59';
+const RAT_BROWSER_VERSION='2026.06.21.61';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -481,11 +481,14 @@ function posRacer(id,x,y){
 function raceRacerLeft(rs,frontX){
   return frontX*960-rs.dw;
 }
+function raceRacerCssLeft(rs,x){
+  return rs.racer.autoX?raceRacerLeft(rs,x):x*960-rs.dw/2;
+}
 function syncRaceRacerPositions(states,cam=0){
   for(const st of states){
     const rs=racerState[st.racer.id]; if(!rs)continue;
     const rx=st.racer.x+(st.distance-cam)/10;
-    rs.cnv.style.left=raceRacerLeft(rs,rx)+'px';
+    rs.cnv.style.left=raceRacerCssLeft(rs,rx)+'px';
     rs.cnv.style.bottom=(st.racer.y*540-rs.dh/2)+'px';
   }
 }
@@ -842,10 +845,11 @@ async function execCmd(line){
 
     case 'setracer':{
       const sid=A(a,0); let id=sid,n=2; while(racerDefs[id])id=sid+'#'+n++;
+      const xArg=A(a,5), autoX=xArg.trim()==='';
       const r={id,sid,
         idleF:Math.max(1,Math.round(F(A(a,1),1))), idleFrameTime:F(A(a,2),1),
         driveF:Math.max(1,Math.round(F(A(a,3),1))), driveFrameTime:F(A(a,4),.06),
-        x:F(A(a,5),.2), y:F(A(a,6),.55), type:A(a,7), trans:A(a,8),
+        x:F(xArg,.2), y:F(A(a,6),.55), type:A(a,7), trans:A(a,8), autoX,
         baseSpeed:vSub(A(a,9),1), shiftTime:vSub(A(a,10),.25),
         texId:sid,
         // 物理パラメータデフォルト
@@ -954,11 +958,15 @@ function shiftMoto(st,dir){
 function shiftCar(st,h,v){
   let g=st.gear;
   const mx=gearMax(st.racer.trans);
-  if(g===0){if(v>0)g=3;else if(v<0)g=4;else if(h<0)g=-1;else if(h>0&&mx>=5)g=-2;}
+  const four=mx===4;
+  if(g===0){if(h<0)g=-1;else if(h>0)g=-2;else if(!four&&v>0)g=3;else if(!four&&v<0)g=4;}
   else if(g===-1){if(v>0)g=1;else if(v<0)g=2;else if(h>0)g=0;}
-  else if(g===-2){if(v>0&&mx>=5)g=5;else if(v<0&&mx>=6)g=6;else if(h<0)g=0;}
+  else if(g===-2){
+    if(four){if(v>0)g=3;else if(v<0)g=4;else if(h<0)g=0;}
+    else if(v>0&&mx>=5)g=5;else if(v<0&&mx>=6)g=6;else if(h<0)g=0;
+  }
   else if(g===1&&v<0||g===2&&v>0)g=-1;
-  else if(g===3&&v<0||g===4&&v>0)g=0;
+  else if(g===3&&v<0||g===4&&v>0)g=four?-2:0;
   else if(g===5&&v<0||g===6&&v>0)g=-2;
   st.gear=g;
 }
@@ -1350,7 +1358,7 @@ async function doRace(){
   async function showFlyingMotion(){
     if(!pSt){await waitMs(700);return;}
     const rs=racerState[pSt.racer.id];
-    const baseLeft=rs?raceRacerLeft(rs,pSt.racer.x):pSt.racer.x*960;
+    const baseLeft=rs?raceRacerCssLeft(rs,pSt.racer.x):pSt.racer.x*960;
     const begun=performance.now();
     while(true){
       const elapsed=performance.now()-begun,progress=CLAMP(elapsed/700,0,1);
@@ -1458,7 +1466,7 @@ async function doRace(){
       const dur=drv?st.racer.driveFrameTime:st.racer.idleFrameTime;
       const fr=Math.floor(raceLastT/1000/Math.max(.01,dur))%Math.max(1,drv?st.racer.driveF:st.racer.idleF);
       drawRacerFrame(st.racer.id,drv,fr);
-      rs.cnv.style.left=raceRacerLeft(rs,rx)+'px';
+      rs.cnv.style.left=raceRacerCssLeft(rs,rx)+'px';
       rs.cnv.style.bottom=(st.racer.y*540-rs.dh/2)+'px';
     }
   }
@@ -1474,7 +1482,7 @@ async function doRace(){
     for(const st of rStates){
       const rs=racerState[st.racer.id];if(!rs)continue;
       const rx=st.racer.x+(st.distance-cam)/10;
-      rs.cnv.style.left=raceRacerLeft(rs,rx)+'px';
+      rs.cnv.style.left=raceRacerCssLeft(rs,rx)+'px';
     }
   }
   stopEngine(); engGain.gain.value=sfxVol;
@@ -1558,7 +1566,7 @@ function buildSave(){
   if(Math.abs(raceBgSpeed)>.0001)L.push('MoveRaceBackground,'+raceBgSpeed);
   for(const[k,v] of Object.entries(items))L.push('SetItem,'+k+','+Object.entries(v).map(([a,b])=>a+'='+b).join(','));
   for(const[k,v] of Object.entries(vars))L.push('SetValue,'+k+','+v);
-  for(const[,r] of Object.entries(racerDefs))L.push(['SetRacer',r.sid,r.idleF,r.idleFrameTime,r.driveF,r.driveFrameTime,r.x,r.y,r.type,r.trans,r.baseSpeed,r.shiftTime].join(','));
+  for(const[,r] of Object.entries(racerDefs))L.push(['SetRacer',r.sid,r.idleF,r.idleFrameTime,r.driveF,r.driveFrameTime,r.autoX?'':r.x,r.y,r.type,r.trans,r.baseSpeed,r.shiftTime].join(','));
   for(const id of drivenRacers)L.push('DriveRacer,'+id);
   for(const[,p] of Object.entries(portraits))L.push('SetPortrait,'+p.pid+','+p.imgName+','+p.x+','+p.y);
   for(const p of panelRecords){
@@ -1722,7 +1730,7 @@ async function loadTheme(){
   // ギア画像
   for(const tr of['motorcycle4','motorcycle5','motorcycle6','car4','car5','car6']){
     const mx=tr.endsWith('4')?4:tr.endsWith('5')?5:6;
-    const mn=tr.startsWith('car')?(tr==='car4'?-1:-2):0;
+    const mn=tr.startsWith('car')?-2:0;
     for(let g=mn;g<=mx;g++){const im=await getImg('essential','gear_'+tr+'_'+g,'.png');if(im)gearTex[tr+'_'+g]=im.src;}
   }
   // デフォルトギア表示
