@@ -40,11 +40,15 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 }
 
 /* ── メッセージ ──────────────────────── */
-#msgwrap{position:absolute;left:0;bottom:-20px;width:960px;height:169px;z-index:8;pointer-events:none;
-  background:url('Mods/essential/uilayer.png') 0 0/960px 169px no-repeat;}
+#msgwrap{position:absolute;left:0;bottom:0;width:960px;height:169px;z-index:8;pointer-events:none;
+  background:var(--message-window-image,url('Mods/essential/uilayer.png')) 0 0/960px 169px no-repeat;}
 #msgbox{position:absolute;left:0;bottom:0;width:960px;height:169px;z-index:9;pointer-events:none;}
-#speaker{position:absolute;left:128px;top:54px;width:704px;height:26px;color:#fff;font-size:18px;font-weight:bold;overflow:hidden;white-space:nowrap;}
-#message{position:absolute;left:128px;top:80px;width:704px;height:92px;color:#fff;font-size:18px;line-height:1.45;overflow:hidden;white-space:pre-wrap;word-break:break-all;}
+#speaker{position:absolute;left:128px;top:42px;width:704px;height:26px;color:#fff;font-size:18px;font-weight:bold;overflow:hidden;white-space:nowrap;}
+#message{position:absolute;left:128px;top:68px;width:704px;height:104px;color:#fff;font-size:18px;line-height:1.45;overflow:hidden;white-space:pre-wrap;word-break:break-all;}
+#msgbox.no-speaker #speaker{display:none;}
+#msgbox.no-speaker #message{top:42px;height:130px;}
+#message.msg-pop-active{animation:msg-pop-spread .34s cubic-bezier(.18,.88,.22,1.12) both;transform-origin:left center;}
+@keyframes msg-pop-spread{0%{opacity:0;transform:translateX(-18px) scaleX(.35) scaleY(.86)}58%{opacity:1;transform:translateX(5px) scale(1.04)}100%{opacity:1;transform:translateX(0) scale(1)}}
 
 /* ── ユーティリティボタン ────────────── */
 #util{position:absolute;right:4px;bottom:4px;z-index:10;display:flex;gap:3px;}
@@ -122,6 +126,10 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 .race-pad:active,.race-pad.active{transform:translateY(2px) scale(.985);filter:brightness(1.25);}
 #pad-clutch{left:28px;}
 #pad-accel{right:28px;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.2),rgba(34,197,94,.22) 38%,rgba(7,12,20,.74));}
+#hud-nitro{position:absolute;right:170px;bottom:16px;min-width:108px;height:58px;border:1px solid rgba(255,255,255,.34);border-radius:8px;background:linear-gradient(180deg,rgba(30,64,175,.88),rgba(7,12,20,.88));color:#fff;font-family:inherit;font-size:18px;font-weight:bold;letter-spacing:.04em;box-shadow:0 12px 28px rgba(0,0,0,.34),inset 0 0 0 1px rgba(255,255,255,.08);pointer-events:auto;touch-action:none;}
+#hud-nitro:disabled{opacity:.36;filter:grayscale(.5);}
+#hud-nitro.ready{filter:brightness(1.18);box-shadow:0 0 18px rgba(96,165,250,.62),0 12px 28px rgba(0,0,0,.34);}
+#hud-nitro-count{display:inline-block;min-width:24px;text-align:center;}
 
 #hud-enemy-name,#hud-enemy-tel,#hud-player-name,#hud-gap{
   background:linear-gradient(180deg,rgba(18,24,34,.9),rgba(8,12,18,.84));
@@ -220,8 +228,9 @@ body.mobile-build .tbtn{
   box-shadow:0 6px 18px rgba(0,0,0,.3);
 }
 body.mobile-build .tbtn:active{transform:translateY(2px);filter:brightness(.9);}
-body.mobile-build #speaker{left:16px;top:50px;width:864px;font-size:22px;}
-body.mobile-build #message{left:16px;top:82px;width:864px;height:87px;font-size:22px;line-height:1.28;}
+body.mobile-build #speaker{left:16px;top:38px;width:864px;font-size:22px;}
+body.mobile-build #message{left:16px;top:70px;width:864px;height:99px;font-size:22px;line-height:1.28;}
+body.mobile-build #msgbox.no-speaker #message{top:42px;height:127px;}
 body.mobile-build #util{right:10px;bottom:8px;gap:7px;}
 body.mobile-build .ubtn{width:46px;height:46px;}
 body.mobile-build .ubtn img{width:30px;height:30px;opacity:.9;}
