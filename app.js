@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.49';
+const RAT_BROWSER_VERSION='2026.06.21.59';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -385,14 +385,16 @@ const panelsEl=document.getElementById('panels');
 let panelBtns=[],panelRecords=[];
 
 function addPanel(label,a1,sub,a2,bg,w,h,sel,noBorder,cx,cy,cb){
-  const PW=Math.max(w>0?w*960:192,sel&&MOBILE_BUILD?280:0);
+  const PW=w>0?w*960:(sel&&MOBILE_BUILD?280:192);
   const PH=Math.max(h>0?h*540:32,sel&&MOBILE_BUILD?44:0);
   const el=document.createElement('div');
-  el.className='panel'+(sel?' sel':'');
+  el.className='panel'+(sel?' sel':'')+(noBorder?' no-border':'');
   el.style.cssText=`left:${cx*960}px;top:${cy*540}px;width:${PW}px;height:${PH}px;opacity:0;transition:opacity .18s;`;
   // 背景色
   let col=sel?'rgba(14,24,41,.97)':'rgba(0,0,0,.48)';
-  if(bg&&bg[0]==='#'){
+  if(bg.trim().toLowerCase()==='transparent'){
+    col='rgba(0,0,0,0)';
+  }else if(bg&&bg[0]==='#'){
     const hex=bg.slice(1);
     if(hex.length>=6){
       const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
@@ -475,6 +477,21 @@ function posRacer(id,x,y){
   s.cnv.style.left=(x*960-s.dw/2)+'px';
   s.cnv.style.bottom=(y*540-s.dh/2)+'px';
   s.cnv.style.top='auto';
+}
+function raceRacerLeft(rs,frontX){
+  return frontX*960-rs.dw;
+}
+function syncRaceRacerPositions(states,cam=0){
+  for(const st of states){
+    const rs=racerState[st.racer.id]; if(!rs)continue;
+    const rx=st.racer.x+(st.distance-cam)/10;
+    rs.cnv.style.left=raceRacerLeft(rs,rx)+'px';
+    rs.cnv.style.bottom=(st.racer.y*540-rs.dh/2)+'px';
+  }
+}
+function syncRaceRacerDefs(){
+  const states=Object.values(racerDefs).map(r=>({racer:r,distance:0}));
+  syncRaceRacerPositions(states);
 }
 function drawRacerFrame(id,driving,frame){
   const s=racerState[id]; if(!s||!s.img)return;
@@ -859,8 +876,8 @@ async function execCmd(line){
       moveRacerScene(id,tx,ty,sec).catch(e=>console.error('MoveRacer error',e));
     }break;
 
-    case 'racesetup': raceSetup={dist:F(A(a,0),400),win:A(a,1),lose:A(a,2)}; break;
-    case 'racestart': await doRace(); break;
+    case 'racesetup': raceSetup={dist:F(A(a,0),400),win:A(a,1),lose:A(a,2)}; syncRaceRacerDefs(); break;
+    case 'racestart': syncRaceRacerDefs(); await doRace(); break;
 
     case 'shake': await doShake(); break;
     case 'shakeall': await doShake(); break;
@@ -931,14 +948,15 @@ function simStep(st,accel,dt){
 // ミッション操作
 function shiftMoto(st,dir){
   const mx=gearMax(st.racer.trans);
-  if(st.gear===0&&dir!==0)st.gear=1;
+  if(st.gear===0&&dir!==0)st.gear=CLAMP(dir>0?2:1,1,mx);
   else if(st.gear>0)st.gear=CLAMP(st.gear+dir,1,mx);
 }
 function shiftCar(st,h,v){
   let g=st.gear;
-  if(g===0){if(v>0)g=3;else if(v<0)g=4;else if(h<0)g=-1;else if(h>0)g=-2;}
+  const mx=gearMax(st.racer.trans);
+  if(g===0){if(v>0)g=3;else if(v<0)g=4;else if(h<0)g=-1;else if(h>0&&mx>=5)g=-2;}
   else if(g===-1){if(v>0)g=1;else if(v<0)g=2;else if(h>0)g=0;}
-  else if(g===-2){if(v>0)g=5;else if(v<0&&gearMax(st.racer.trans)>=6)g=6;else if(h<0)g=0;}
+  else if(g===-2){if(v>0&&mx>=5)g=5;else if(v<0&&mx>=6)g=6;else if(h<0)g=0;}
   else if(g===1&&v<0||g===2&&v>0)g=-1;
   else if(g===3&&v<0||g===4&&v>0)g=0;
   else if(g===5&&v<0||g===6&&v>0)g=-2;
@@ -1258,6 +1276,7 @@ let rStates=[];
 async function doRace(){
   racing=true; forceHideUi=true; setMsgVisible(false); animMsg(1);
   mouseClutchForcedOff=false;
+  racersEl.style.visibility='hidden';
   racersEl.style.display='';
   const hud=document.getElementById('hud'); hud.classList.remove('race-finished');hud.style.display='block';
   initSpriteNumbers();
@@ -1273,6 +1292,12 @@ async function doRace(){
   // 状態初期化
   rStates=Object.values(racerDefs).map(r=>({racer:r,speed:0,distance:0,rpm:0,gear:r.type.toLowerCase()==='player'?0:1,clutch:false,clutchGear:0,shiftCD:0,finish:-1}));
   const pSt=rStates.find(s=>s.racer.type.toLowerCase()==='player')||null;
+  syncRaceRacerPositions(rStates);
+  for(const st of rStates){
+    const rs=racerState[st.racer.id]; if(!rs)continue;
+    drawRacerFrame(st.racer.id,false,0);
+  }
+  racersEl.style.visibility='';
 
   // HUD要素
   const en=document.getElementById('hud-enemy-name'), et=document.getElementById('hud-enemy-tel');
@@ -1325,7 +1350,7 @@ async function doRace(){
   async function showFlyingMotion(){
     if(!pSt){await waitMs(700);return;}
     const rs=racerState[pSt.racer.id];
-    const baseLeft=pSt.racer.x*960-(rs?rs.dw/2:0);
+    const baseLeft=rs?raceRacerLeft(rs,pSt.racer.x):pSt.racer.x*960;
     const begun=performance.now();
     while(true){
       const elapsed=performance.now()-begun,progress=CLAMP(elapsed/700,0,1);
@@ -1354,7 +1379,7 @@ async function doRace(){
       pSt.speed=0;pSt.distance=0;pSt.rpm=0;pSt.gear=0;pSt.clutch=false;pSt.clutchGear=0;
       updateGearHUD(pSt,gearImg);
       const rs=racerState[pSt.racer.id];
-      if(rs){rs.cnv.style.left=(pSt.racer.x*960-rs.dw/2)+'px';drawRacerFrame(pSt.racer.id,false,0);}
+      if(rs){syncRaceRacerPositions([pSt]);drawRacerFrame(pSt.racer.id,false,0);}
     }
     leftClutchHeld=false;mouse.l=false;gesture=null;gShifted=false;
     sig.style.display='none';
@@ -1433,7 +1458,7 @@ async function doRace(){
       const dur=drv?st.racer.driveFrameTime:st.racer.idleFrameTime;
       const fr=Math.floor(raceLastT/1000/Math.max(.01,dur))%Math.max(1,drv?st.racer.driveF:st.racer.idleF);
       drawRacerFrame(st.racer.id,drv,fr);
-      rs.cnv.style.left=(rx*960-rs.dw/2)+'px';
+      rs.cnv.style.left=raceRacerLeft(rs,rx)+'px';
       rs.cnv.style.bottom=(st.racer.y*540-rs.dh/2)+'px';
     }
   }
@@ -1449,7 +1474,7 @@ async function doRace(){
     for(const st of rStates){
       const rs=racerState[st.racer.id];if(!rs)continue;
       const rx=st.racer.x+(st.distance-cam)/10;
-      rs.cnv.style.left=(rx*960-rs.dw/2)+'px';
+      rs.cnv.style.left=raceRacerLeft(rs,rx)+'px';
     }
   }
   stopEngine(); engGain.gain.value=sfxVol;

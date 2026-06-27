@@ -33,6 +33,7 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 .panel-left{flex:1;padding:0 8px;color:#fff;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .panel-right{flex:1;padding:0 8px;color:#fff;font-size:15px;text-align:right;white-space:nowrap;overflow:hidden;}
 .panel.sel{cursor:pointer;border:1px solid rgba(97,114,140,.9);outline:none;}
+.panel.sel.no-border{border:none!important;box-shadow:none!important;}
 .panel.sel.focus{z-index:1;background:#666!important;border:none!important;filter:none;box-shadow:none;}
 @media (hover:hover) and (pointer:fine){
   .panel.sel:hover{z-index:1;background:#666!important;border:none!important;filter:none;box-shadow:none;}
