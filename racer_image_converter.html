@@ -134,6 +134,9 @@ h1 {
 .btn:not(:disabled):active { transform: scale(0.97); }
 .btn-convert { background: #c87820; color: #fff; }
 .btn-dl      { background: #5a8a3c; color: #fff; }
+.slot-actions { display: flex; gap: 10px; margin-bottom: 18px; }
+.btn-add-slot { background: #8b4513; color: #fff; }
+.btn-remove-slot { background: #a07850; color: #fff; }
 
 .preview-wrap {
   background: #fffdf7;
@@ -200,6 +203,11 @@ h1 {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
+  .slot-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
   .btn { padding: 14px 10px; font-size: 0.95rem; width: 100%; }
 }
 </style>
@@ -242,6 +250,11 @@ h1 {
   </div>
 </div>
 
+<div class="slot-actions">
+  <button class="btn btn-add-slot" id="btnAddSlot" type="button">枠を増やす</button>
+  <button class="btn btn-remove-slot" id="btnRemoveSlot" type="button" disabled>枠を減らす</button>
+</div>
+
 <div class="settings">
   <div class="setting-row">
     <span class="label">倍率</span>
@@ -277,10 +290,17 @@ h1 {
 
 <script>
 const images = [null, null, null];
+const uploadList = document.querySelector('.upload-list');
 const outputCanvas = document.getElementById('outputCanvas');
 const outputCtx = outputCanvas.getContext('2d');
 
-for (let i = 0; i < 3; i++) {
+for (let i = 0; i < images.length; i++) setupSlot(i);
+
+document.getElementById('btnAddSlot').addEventListener('click', addSlot);
+document.getElementById('btnRemoveSlot').addEventListener('click', removeSlot);
+updateSlotButtons();
+
+function setupSlot(i) {
   const zone = document.getElementById(`zone${i}`);
   const fileInput = document.getElementById(`file${i}`);
   fileInput.addEventListener('change', e => {
@@ -294,6 +314,39 @@ for (let i = 0; i < 3; i++) {
     zone.classList.remove('dragover');
     if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0], i);
   });
+}
+
+function addSlot() {
+  const i = images.length;
+  images.push(null);
+
+  const zone = document.createElement('div');
+  zone.className = 'drop-zone';
+  zone.id = `zone${i}`;
+  zone.innerHTML = `
+    <canvas class="prev-canvas" id="prev${i}" width="140" height="60"></canvas>
+    <div class="zone-info">
+      <div class="slot-name">${i + 1}枚目</div>
+      <div class="slot-desc">前の画像の直下に配置</div>
+      <div class="filename" id="name${i}">クリック または ドロップ</div>
+    </div>
+    <input type="file" id="file${i}" accept=".bmp,image/*" style="display:none">
+    <label class="zone-click" for="file${i}"></label>
+  `;
+  uploadList.appendChild(zone);
+  setupSlot(i);
+  updateConvertButton();
+  updateSlotButtons();
+}
+
+function removeSlot() {
+  if (images.length <= 3) return;
+
+  const i = images.length - 1;
+  document.getElementById(`zone${i}`)?.remove();
+  images.pop();
+  updateConvertButton();
+  updateSlotButtons();
 }
 
 const scaleInput = document.getElementById('scale');
@@ -333,11 +386,19 @@ function handleFile(file, idx) {
       ctx.drawImage(img, (pv.width - dw) / 2, (pv.height - dh) / 2, dw, dh);
       document.getElementById(`name${idx}`).textContent = file.name;
       document.getElementById(`zone${idx}`).classList.add('loaded');
-      document.getElementById('btnConvert').disabled = !images.every(Boolean);
+      updateConvertButton();
     };
     img.src = ev.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+function updateConvertButton() {
+  document.getElementById('btnConvert').disabled = !images.every(Boolean);
+}
+
+function updateSlotButtons() {
+  document.getElementById('btnRemoveSlot').disabled = images.length <= 3;
 }
 
 function hexToRgb(hex) {
@@ -361,30 +422,35 @@ function chromaKey(img, bgRgb, tol) {
 }
 
 function convert() {
-  const [img1, img2, img3] = images;
   const bgRgb = hexToRgb(document.getElementById('bgColor').value);
   const tol   = parseInt(document.getElementById('tolerance').value);
   const scale = parseInt(document.getElementById('scale').value) / 10;
 
-  const w1 = Math.round(img1.width * scale), h1 = Math.round(img1.height * scale);
-  const w2 = Math.round(img2.width * scale), h2 = Math.round(img2.height * scale);
-  const w3 = Math.round(img3.width * scale), h3 = Math.round(img3.height * scale);
+  const scaled = images.map(img => ({
+    img,
+    w: Math.round(img.width * scale),
+    h: Math.round(img.height * scale),
+  }));
 
-  const w = w1 * 2;
-  const h = h1 + h2 + h3;
+  const w1 = scaled[0].w;
+  const h1 = scaled[0].h;
+  const rightWidth = Math.max(...scaled.slice(1).map(item => item.w), w1);
+  const w = Math.max(w1 * 2, w1 + rightWidth);
+  const h = h1 + scaled.slice(1).reduce((sum, item) => sum + item.h, 0);
   outputCanvas.width = w;
   outputCanvas.height = h;
   outputCtx.clearRect(0, 0, w, h);
   outputCtx.imageSmoothingEnabled = false;
 
-  const s1 = chromaKey(img1, bgRgb, tol);
-  const s2 = chromaKey(img2, bgRgb, tol);
-  const s3 = chromaKey(img3, bgRgb, tol);
+  const keyed = scaled.map(item => chromaKey(item.img, bgRgb, tol));
 
-  outputCtx.drawImage(s1, 0,  0,  w1, h1);
-  outputCtx.drawImage(s1, w1, 0,  w1, h1);
-  outputCtx.drawImage(s2, w1, h1, w2, h2);
-  outputCtx.drawImage(s3, w1, h1 + h2, w3, h3);
+  outputCtx.drawImage(keyed[0], 0,  0,  w1, h1);
+  outputCtx.drawImage(keyed[0], w1, 0,  w1, h1);
+  let y = h1;
+  for (let i = 1; i < scaled.length; i++) {
+    outputCtx.drawImage(keyed[i], w1, y, scaled[i].w, scaled[i].h);
+    y += scaled[i].h;
+  }
 
   document.getElementById('canvasInfo').textContent = `出力プレビュー (${w} × ${h} px)`;
   document.getElementById('btnDl').disabled = false;
