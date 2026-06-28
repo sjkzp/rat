@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.85';
+const RAT_BROWSER_VERSION='2026.06.21.88';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -1402,12 +1402,17 @@ function bindRacePad(id,key){
 bindRacePad('pad-accel','accel');
 bindRacePad('pad-clutch','clutch');
 const nitroButton=document.getElementById('hud-nitro');
-if(nitroButton)nitroButton.addEventListener('pointerdown',e=>{
+function triggerNitroButton(e){
   if(!racing)return;
   e.preventDefault();e.stopPropagation();
+  if(typeof e.buttons==='number'&&(e.buttons&2)){rightAccelHeld=true;mouse.r=true;latchAccel(1000);}
   const ps=rStates.find(s=>s.racer.type.toLowerCase()==='player');
   triggerNitro(ps,true);
-},{passive:false});
+}
+if(nitroButton){
+  nitroButton.addEventListener('pointerdown',triggerNitroButton,{passive:false});
+  nitroButton.addEventListener('mousedown',triggerNitroButton,{passive:false});
+}
 function bindMobileRaceZone(id,key){
   const el=document.getElementById(id);if(!el)return;
   let inputId=null,feedback=null,inputMatrix=null,rotatedFallback=false,stopTracking=()=>{};
