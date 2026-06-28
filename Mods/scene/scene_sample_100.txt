@@ -42,9 +42,11 @@ Jump,#race_setting
 【レース操作方法② PC操作】,,シフト操作（マウスの場合）：クラッチを押したままマウスジェスチャー<br>シフト操作（キーボードの場合）：クラッチを押したまま矢印キーで変更
 【レース操作方法③ スマホ操作】,,シフト操作：画面左半分を押してスワイプしてシフト<br>アクセル：画面右半分を押し続ける
 ,,Manualの場合は、NITROボタン / Spaceキー / Xキーでニトロを発動できます
+,,ニトロ発動時は、車体近くのエフェクトとは別にカットインも表示されます
 
 WipeIn,AroundToCenter
-SetNitroAnime,nitro_sample,nitro_sample,-0.12,0.00,-0.32,0.00,0.45,page02
+SetNitroAnime,nitro_sample,nitro_sample,-0.12,0.00,-0.32,0.00,0.75,page02
+SetNitroCutin,nitro_sample,nitro_cutin,faceKoichiro_A,1.4,0.78,0.00,0.48,0.00,1.2,page02
 SetRacer,EVR_TYPE_S,1,1.0,3,0.06,0.20,0.60,Standard,MotorCycle5,2.45,0.4
 SetRacer,Pizza,1,1.0,3,0.06,0.20,0.45,Player,MotorCycle5,2.35,0
 
