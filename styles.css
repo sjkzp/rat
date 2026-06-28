@@ -131,7 +131,7 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 #hud-nitro.ready{filter:brightness(1.18);box-shadow:0 0 18px rgba(96,165,250,.62),0 12px 28px rgba(0,0,0,.34);}
 #hud-nitro-count{display:inline-block;min-width:24px;text-align:center;}
 .nitro-cutin{position:absolute;left:0;top:0;width:960px;height:540px;overflow:hidden;z-index:160;pointer-events:none;}
-.nitro-cutin-bg{position:absolute;left:0;top:0;width:960px;height:144px;background-repeat:no-repeat;background-position:0 0;image-rendering:pixelated;}
+.nitro-cutin-bg{position:absolute;left:640px;top:0;width:320px;height:144px;background-repeat:no-repeat;background-position:right top;image-rendering:pixelated;}
 .nitro-cutin-face{position:absolute;left:0;top:0;max-width:none;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 8px 12px rgba(0,0,0,.55));}
 
 #hud-enemy-name,#hud-enemy-tel,#hud-player-name,#hud-gap{

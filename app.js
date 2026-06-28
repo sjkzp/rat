@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.88';
+const RAT_BROWSER_VERSION='2026.06.21.101';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -287,6 +287,7 @@ let textStyle={color:'#fff',bold:false,outlineColor:'#000',outlineWidth:0};
 let messageEffect='none', messageWindowName='';
 let bgName='',nearName='',farName='',bgmName='',effectName='';
 let nearOff=0,farOff=0,raceBgSpeed=0;
+let raceZoom={racerId:'',amount:0};
 let effectImg=null,effUX=0,effUY=0,effAlpha=1,effCycle=0,effOX=0,effOY=0;
 let bgImg=null,nearImg=null,farImg=null;
 let raceSetup={dist:400,win:'',lose:''};
@@ -547,6 +548,44 @@ function syncRaceRacerPositions(states,cam=0){
     rs.cnv.style.bottom=(st.racer.y*540-rs.dh/2)+'px';
   }
 }
+const raceZoomEls=()=>[
+  document.getElementById('c-bg'),
+  document.getElementById('c-far'),
+  document.getElementById('c-near'),
+  document.getElementById('c-eff'),
+  racersEl
+].filter(Boolean);
+function setRaceZoom(rs,value=1){
+  if(!rs)return;
+  raceZoom={racerId:rs.racer.id,amount:Math.max(raceZoom.amount||0,value)};
+  applyRaceZoom(0);
+}
+function applyRaceZoom(dt=0){
+  if(dt>0&&raceZoom.amount>0)raceZoom.amount=Math.max(0,raceZoom.amount-dt*1.55);
+  const z=raceZoom.amount||0;
+  if(z>0){
+    const rs=racerState[raceZoom.racerId];
+    const left=rs?(parseFloat(rs.cnv.style.left)||0):480;
+    const bottom=rs?(parseFloat(rs.cnv.style.bottom)||0):270;
+    const x=rs?left+rs.dw*.55:480;
+    const y=rs?540-(bottom+rs.dh*.58):270;
+    const scale=1+.26*(1-Math.pow(1-z,2));
+    for(const el of raceZoomEls()){
+      el.style.transformOrigin=`${x}px ${y}px`;
+      el.style.transform=`scale(${scale})`;
+    }
+  }else{
+    for(const el of raceZoomEls()){
+      el.style.transform='';
+      el.style.transformOrigin='';
+    }
+    raceZoom.racerId='';
+  }
+}
+function clearRaceZoom(){
+  raceZoom={racerId:'',amount:0};
+  applyRaceZoom(0);
+}
 function syncRaceRacerDefs(){
   const states=Object.values(racerDefs).map(r=>({racer:r,distance:0}));
   syncRaceRacerPositions(states);
@@ -608,7 +647,9 @@ function playNitroEffect(st,n){
   if(!anime)return;
   if(anime.sound)playSFX(anime.sound);
   const rs=racerState[st.racer.id];
-  if(!rs||!anime.img)return;
+  if(!rs)return;
+  playNitroAfterimages(rs);
+  if(!anime.img)return;
   const el=document.createElement('img');
   el.src=anime.img.src;
   el.className='nitro-effect';
@@ -630,6 +671,30 @@ function playNitroEffect(st,n){
   };
   requestAnimationFrame(tick);
 }
+function playNitroAfterimages(rs){
+  if(!rs||!rs.cnv)return;
+  for(let i=0;i<3;i++){
+    const ghost=document.createElement('canvas');
+    ghost.width=rs.cnv.width;ghost.height=rs.cnv.height;
+    ghost.className='nitro-afterimage';
+    ghost.style.cssText='position:absolute;top:auto;pointer-events:none;image-rendering:pixelated;mix-blend-mode:screen;';
+    ghost.style.width=rs.dw+'px';ghost.style.height=rs.dh+'px';
+    ghost.getContext('2d').drawImage(rs.cnv,0,0);
+    racersEl.insertBefore(ghost,rs.cnv);
+    const offset=64+i*54,alpha=.62-i*.13,start=performance.now(),dur=560+i*70;
+    const tick=now=>{
+      if(!ghost.isConnected)return;
+      const p=CLAMP((now-start)/dur,0,1);
+      const currentLeft=parseFloat(rs.cnv.style.left)||0;
+      const currentBottom=parseFloat(rs.cnv.style.bottom)||0;
+      ghost.style.left=(currentLeft-offset-p*24)+'px';
+      ghost.style.bottom=currentBottom+'px';
+      ghost.style.opacity=Math.max(0,alpha*(1-p));
+      if(p<1)requestAnimationFrame(tick);else ghost.remove();
+    };
+    requestAnimationFrame(tick);
+  }
+}
 function playNitroCutin(animeId){
   const cutin=nitroCutins[String(animeId||'').toLowerCase()];
   if(!cutin)return;
@@ -640,7 +705,8 @@ function playNitroCutin(animeId){
   bg.className='nitro-cutin-bg';
   if(cutin.bg){
     bg.style.backgroundImage=`url("${cutin.bg.src}")`;
-    bg.style.backgroundSize='100% 144px';
+    bg.style.backgroundSize='960px 144px';
+    bg.style.backgroundPosition='right top';
   }
   root.appendChild(bg);
   let face=null;
@@ -659,12 +725,13 @@ function playNitroCutin(animeId){
   const tick=now=>{
     if(!root.isConnected)return;
     const p=CLAMP((now-start)/dur,0,1);
+    const motionP=1-Math.pow(1-CLAMP(p*1.8,0,1),3);
     const yTop=LERP(cutin.faceY1,cutin.faceY2,p)*540;
     if(cutin.bg)bg.style.transform=`translateY(${yTop}px)`;
     if(face){
-      const x=LERP(cutin.faceX1,cutin.faceX2,p)*960;
+      const x=LERP(cutin.faceX1,cutin.faceX2,motionP)*960;
       face.style.transform=`translate(${x}px,${yTop}px) translateX(-50%)`;
-      face.style.opacity=String(CLAMP(Math.min(p*4,(1-p)*4),0,1));
+      face.style.opacity=String(CLAMP(Math.min(p*8,(1-p)*5),0,1));
     }
     if(p<1)requestAnimationFrame(tick);else root.remove();
   };
@@ -680,6 +747,7 @@ function triggerNitro(st,manual=false){
   n.activeBoostMps=n.boostPercent!==null?st.speed*n.boostPercent:n.boostMps;
   n.activeLeft=Math.max(.05,n.duration);
   n.cooldownLeft=Math.max(0,n.cooldown);
+  if(st.racer.type&&st.racer.type.toLowerCase()==='player')setRaceZoom(racerState[st.racer.id],1);
   playNitroCutin(n.animeId);
   playNitroEffect(st,n);
   if(st.racer.type&&st.racer.type.toLowerCase()==='player')updateNitroHud(st);
@@ -1402,9 +1470,16 @@ function bindRacePad(id,key){
 bindRacePad('pad-accel','accel');
 bindRacePad('pad-clutch','clutch');
 const nitroButton=document.getElementById('hud-nitro');
+function pointInNitroButton(e){
+  if(!nitroButton||!racing||nitroButton.disabled||nitroButton.style.display==='none')return false;
+  const r=nitroButton.getBoundingClientRect();
+  return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;
+}
 function triggerNitroButton(e){
-  if(!racing)return;
-  e.preventDefault();e.stopPropagation();
+  if(!pointInNitroButton(e))return;
+  if(e.preventDefault)e.preventDefault();
+  if(e.stopPropagation)e.stopPropagation();
+  if(e.stopImmediatePropagation)e.stopImmediatePropagation();
   if(typeof e.buttons==='number'&&(e.buttons&2)){rightAccelHeld=true;mouse.r=true;latchAccel(1000);}
   const ps=rStates.find(s=>s.racer.type.toLowerCase()==='player');
   triggerNitro(ps,true);
@@ -1413,6 +1488,12 @@ if(nitroButton){
   nitroButton.addEventListener('pointerdown',triggerNitroButton,{passive:false});
   nitroButton.addEventListener('mousedown',triggerNitroButton,{passive:false});
 }
+window.addEventListener('pointerdown',triggerNitroButton,{capture:true,passive:false});
+window.addEventListener('mousedown',triggerNitroButton,{capture:true,passive:false});
+window.addEventListener('touchstart',e=>{
+  const t=e.changedTouches&&e.changedTouches[0];
+  if(t)triggerNitroButton(t);
+},{capture:true,passive:false});
 function bindMobileRaceZone(id,key){
   const el=document.getElementById(id);if(!el)return;
   let inputId=null,feedback=null,inputMatrix=null,rotatedFallback=false,stopTracking=()=>{};
@@ -1544,6 +1625,7 @@ let rStates=[];
 
 async function doRace(){
   racing=true; raceNitroReady=false; forceHideUi=true; setMsgVisible(false); animMsg(1);
+  clearRaceZoom();
   mouseClutchForcedOff=false;
   racersEl.style.visibility='hidden';
   racersEl.style.display='';
@@ -1740,6 +1822,7 @@ async function doRace(){
       rs.cnv.style.left=raceRacerCssLeft(rs,rx)+'px';
       rs.cnv.style.bottom=(st.racer.y*540-rs.dh/2)+'px';
     }
+    applyRaceZoom(simDt);
   }
   // ゴール後も車体を右へ走り抜けさせる。
   for(let t=0;t<.4;){
@@ -1755,8 +1838,10 @@ async function doRace(){
       const rx=st.racer.x+(st.distance-cam)/10;
       rs.cnv.style.left=raceRacerCssLeft(rs,rx)+'px';
     }
+    applyRaceZoom(dt);
   }
   stopEngine(); stopCpuEngines(); engGain.gain.value=sfxVol;
+  clearRaceZoom();
   if(raceControls)raceControls.classList.remove('visible');
   if(mobileRaceInput)mobileRaceInput.classList.remove('visible');
 
@@ -2059,6 +2144,7 @@ function resetAll(){
   bgImg=nearImg=farImg=effectImg=null;
   bgName=nearName=farName=bgmName=effectName='';
   nearOff=farOff=raceBgSpeed=0;
+  clearRaceZoom();
   curSpeaker=curPid=curText='';
   textStyle={color:'#fff',bold:false,outlineColor:'#000',outlineWidth:0};
   messageEffect='none'; messageWindowName='';
@@ -2132,7 +2218,7 @@ async function initMods(){
 
 statusEl.addEventListener('click',async()=>{
   if(await pickFolder())await modsOK();
-  else statusEl.innerHTML='<span class="folder-pick-link">Modsフォルダが見つかりません</span>';
+  else statusEl.innerHTML='📂 <span class="folder-pick-link">Modsフォルダが見つかりません</span>';
 });
 document.addEventListener('dragover',e=>e.preventDefault());
 document.addEventListener('drop',async e=>{
