@@ -346,7 +346,7 @@ function addSlot() {
 }
 
 function removeSlot() {
-  if (images.length <= 3) return;
+  if (images.length <= 1) return;
 
   const i = images.length - 1;
   document.getElementById(`zone${i}`)?.remove();
@@ -404,7 +404,7 @@ function updateConvertButton() {
 }
 
 function updateSlotButtons() {
-  document.getElementById('btnRemoveSlot').disabled = images.length <= 3;
+  document.getElementById('btnRemoveSlot').disabled = images.length <= 1;
 }
 
 function hexToRgb(hex) {
@@ -440,9 +440,10 @@ function convert() {
 
   const w1 = scaled[0].w;
   const h1 = scaled[0].h;
-  const rightWidth = Math.max(...scaled.slice(1).map(item => item.w), w1);
+  const rightItems = scaled.slice(1);
+  const rightWidth = Math.max(...rightItems.map(item => item.w), w1);
   const w = Math.max(w1 * 2, w1 + rightWidth);
-  const h = h1 + scaled.slice(1).reduce((sum, item) => sum + item.h, 0);
+  const h = h1 + rightItems.reduce((sum, item) => sum + item.h, 0);
   outputCanvas.width = w;
   outputCanvas.height = h;
   outputCtx.clearRect(0, 0, w, h);
