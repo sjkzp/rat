@@ -49,8 +49,8 @@ SetNitroAnime,nitro_sample,,0.00,0.00,0.00,0.00,0.75,page02
 SetNitroCutin,nitro_sample,nitro_cutin,faceKoichiro_A,1.8,1.10,0.00,0.88,0.00,0.55,page02
 SetNitroAnime,nitro_sample_cpu,,0.00,0.00,0.00,0.00,0.75,page02
 SetNitroCutin,nitro_sample_cpu,nitro_cutin,faceMiki_B,1.8,1.10,0.00,0.88,0.00,0.55,page02
-SetRacer,EVR_TYPE_S,1,1.0,3,0.06,0.20,0.60,Standard,MotorCycle5,3.10,0.4
-SetRacer,Pizza,1,1.0,3,0.06,0.20,0.45,Player,MotorCycle5,3.00,0
+SetRacer,EVR_TYPE_S,1,1.0,3,0.06,0.20,0.60,Standard,MotorCycle5,3.3,0.4
+SetRacer,Pizza,1,1.0,3,0.06,0.20,0.45,Player,MotorCycle5,3.0,0
 
 CheckValue,NitroMode,==,1,#set_manual
 CheckValue,NitroMode,==,2,#set_auto
