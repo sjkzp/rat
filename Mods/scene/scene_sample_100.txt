@@ -45,10 +45,12 @@ Jump,#race_setting
 ,,ニトロ発動時は、車体近くのエフェクトとは別にカットインも表示されます
 
 WipeIn,AroundToCenter
-SetNitroAnime,nitro_sample,nitro_sample,-0.12,0.00,-0.32,0.00,0.75,page02
-SetNitroCutin,nitro_sample,nitro_cutin,faceKoichiro_A,1.4,0.78,0.00,0.48,0.00,1.2,page02
-SetRacer,EVR_TYPE_S,1,1.0,3,0.06,0.20,0.60,Standard,MotorCycle5,2.45,0.4
-SetRacer,Pizza,1,1.0,3,0.06,0.20,0.45,Player,MotorCycle5,2.35,0
+SetNitroAnime,nitro_sample,,0.00,0.00,0.00,0.00,0.75,page02
+SetNitroCutin,nitro_sample,nitro_cutin,faceKoichiro_A,1.8,1.10,0.00,0.88,0.00,0.55,page02
+SetNitroAnime,nitro_sample_cpu,,0.00,0.00,0.00,0.00,0.75,page02
+SetNitroCutin,nitro_sample_cpu,nitro_cutin,faceMiki_B,1.8,1.10,0.00,0.88,0.00,0.55,page02
+SetRacer,EVR_TYPE_S,1,1.0,3,0.06,0.20,0.60,Standard,MotorCycle5,3.10,0.4
+SetRacer,Pizza,1,1.0,3,0.06,0.20,0.45,Player,MotorCycle5,3.00,0
 
 CheckValue,NitroMode,==,1,#set_manual
 CheckValue,NitroMode,==,2,#set_auto
@@ -64,14 +66,14 @@ SetNitro,Pizza,nitro_sample,2,10%,0.8,2.0,Auto
 Jump,#race
 
 #set_cpu
-SetNitro,EVR_TYPE_S,nitro_sample,2,45,1.0,2.0,CPU
+SetNitro,EVR_TYPE_S,nitro_sample_cpu,2,45,1.0,2.0,CPU
 Jump,#race
 
 #race
 SetBackground,race_sky_night
 SetRaceBackground,race_road,race_city
 SetBGM,race
-RaceSetup,300,#race_win,#race_lose
+RaceSetup,1000,#race_win,#race_lose
 WipeOut,AroundToCenter
 RaceStart
 

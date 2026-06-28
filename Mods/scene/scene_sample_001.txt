@@ -16,7 +16,7 @@ SetPen,0.52,0.2
 SetPanel,Selectable,#sample_select6,エフェクト,Left,,,,,0.36,
 SetPanel,Selectable,#sample_select7,ランダム,Left,,,,,0.36,
 SetPanel,Selectable,#sample_select8,ニトロ,Left,,,,,0.36,
-SetPanel,Selectable,#sample_select9,フォント・メッセージウィンドウ,Left,,,,,0.36,
+SetPanel,Selectable,#sample_select9,表示カスタム,Left,,,,,0.36,
 ,,みたいサンプルを選択してください
 Stop
 
