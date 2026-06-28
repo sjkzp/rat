@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.21.70';
+const RAT_BROWSER_VERSION='2026.06.21.85';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -179,7 +179,7 @@ const CMD_SET=new Set(['jump','scene','setbackground','setportrait','moveportrai
   'disposeallpanel','disposeallpanels','disposelallpanels','stop','setitem','checkitem',
   'deleteitem','clearitem','racesetup','racestart','setracebackground','moveracebackground',
   'movebackground','seteffect','cleareffect','setracer','driveracer','moveracer','clearracer',
-  'setnitro','clearnitro','setnitroanime',
+  'setnitro','clearnitro','setnitroanime','setnitrocutin',
   'setvalue','addvalue','subvalue','multivalue','multvalue','divvalue','checkvalue','rnd','random',
   'shake','shakeall','loaded','setracerbackground']);
 
@@ -220,6 +220,7 @@ function playBGM(buf){
 }
 function playSFX(buf){if(!buf)return;const n=audioCtx.createBufferSource();n.buffer=buf;n.connect(sfxGain);n.start();}
 let engNode=null,engBuf=null,defaultEngBuf=null,engPitch=1;
+const cpuEngineNodes=new Map();
 function startEngine(){
   if(!engBuf||engNode)return;
   engNode=audioCtx.createBufferSource(); engNode.buffer=engBuf; engNode.loop=true;
@@ -227,6 +228,31 @@ function startEngine(){
 }
 function stopEngine(){if(engNode){try{engNode.stop();}catch{}engNode=null;}}
 function setEngPitch(v){engPitch=v;if(engNode)engNode.playbackRate.value=v;}
+function startCpuEngine(st){
+  if(!st||!st.racer||st.racer.type.toLowerCase()==='player'||cpuEngineNodes.has(st.racer.id))return;
+  const buf=st.racer.engineBuf||defaultEngBuf;
+  if(!buf)return;
+  const node=audioCtx.createBufferSource();
+  const gain=audioCtx.createGain();
+  node.buffer=buf; node.loop=true; node.playbackRate.value=1;
+  gain.gain.value=.55;
+  node.connect(gain); gain.connect(engGain);
+  node.start();
+  cpuEngineNodes.set(st.racer.id,{node,gain});
+}
+function startCpuEngines(states){for(const st of states||[])startCpuEngine(st);}
+function stopCpuEngines(){
+  for(const item of cpuEngineNodes.values()){
+    try{item.node.stop();}catch{}
+    try{item.node.disconnect();item.gain.disconnect();}catch{}
+  }
+  cpuEngineNodes.clear();
+}
+function setCpuEnginePitch(st){
+  const item=st&&st.racer?cpuEngineNodes.get(st.racer.id):null;
+  if(!item)return;
+  item.node.playbackRate.value=1+(st.rpm||0)*5;
+}
 let gcBuf=null,shiftBuf=null; // gear change SFX
 
 // ── Canvas ──────────────────────────────────────────────────
@@ -250,7 +276,7 @@ function drawBg(ctx,img,offX=0,tile=false){
 // ── ゲーム状態 ──────────────────────────────────────────────
 let scene=null, sceneName='', pc=0;
 let waiting=false, stopped=false, running=false;
-const vars={}, items={}, racerDefs={}, nitroDefs={}, nitroAnimes={}, drivenRacers=new Set();
+const vars={}, items={}, racerDefs={}, nitroDefs={}, nitroAnimes={}, nitroCutins={}, drivenRacers=new Set();
 const portraits={}; // pid -> {pid,imgName,x,y}
 let penX=0, penY=0;
 let msgVisible=true;
@@ -264,7 +290,7 @@ let nearOff=0,farOff=0,raceBgSpeed=0;
 let effectImg=null,effUX=0,effUY=0,effAlpha=1,effCycle=0,effOX=0,effOY=0;
 let bgImg=null,nearImg=null,farImg=null;
 let raceSetup={dist:400,win:'',lose:''};
-let racing=false;
+let racing=false,raceNitroReady=false;
 // theme assets
 const gearTex={}, signalTex={}, signalSfx={};
 let tachoSrc='',needleSrc='',gearSrc='';
@@ -536,6 +562,7 @@ function drawRacerFrame(id,driving,frame){
 }
 
 function playShiftEffect(st){
+  if(!st)return;
   playSFX(gcBuf);playSFX(shiftBuf);
   const rs=st&&racerState[st.racer.id];
   if(!gearEffectImg||!rs)return;
@@ -572,7 +599,7 @@ function updateNitroHud(st){
   btn.style.display=n?'':'none';
   if(!n)return;
   cnt.textContent=n.remaining;
-  const ready=n.remaining>0&&n.cooldownLeft<=0&&n.activeLeft<=0&&(!st||st.finish<0);
+  const ready=raceNitroReady&&n.remaining>0&&n.cooldownLeft<=0&&n.activeLeft<=0&&(!st||st.finish<0);
   btn.disabled=!ready;
   btn.classList.toggle('ready',ready);
 }
@@ -603,15 +630,57 @@ function playNitroEffect(st,n){
   };
   requestAnimationFrame(tick);
 }
+function playNitroCutin(animeId){
+  const cutin=nitroCutins[String(animeId||'').toLowerCase()];
+  if(!cutin)return;
+  if(cutin.sound)playSFX(cutin.sound);
+  const root=document.createElement('div');
+  root.className='nitro-cutin';
+  const bg=document.createElement('div');
+  bg.className='nitro-cutin-bg';
+  if(cutin.bg){
+    bg.style.backgroundImage=`url("${cutin.bg.src}")`;
+    bg.style.backgroundSize='100% 144px';
+  }
+  root.appendChild(bg);
+  let face=null;
+  if(cutin.face){
+    face=document.createElement('img');
+    face.className='nitro-cutin-face';
+    face.src=cutin.face.src;
+    const h=144,w=h*(cutin.face.naturalWidth||h)/Math.max(1,(cutin.face.naturalHeight||h));
+    face.style.width=w+'px';
+    face.style.height=h+'px';
+    root.appendChild(face);
+  }
+  hud.appendChild(root);
+  const start=performance.now(),dur=Math.max(.05,cutin.seconds)*1000;
+  const cutinHeight=144;
+  const tick=now=>{
+    if(!root.isConnected)return;
+    const p=CLAMP((now-start)/dur,0,1);
+    const yTop=LERP(cutin.faceY1,cutin.faceY2,p)*540;
+    if(cutin.bg)bg.style.transform=`translateY(${yTop}px)`;
+    if(face){
+      const x=LERP(cutin.faceX1,cutin.faceX2,p)*960;
+      face.style.transform=`translate(${x}px,${yTop}px) translateX(-50%)`;
+      face.style.opacity=String(CLAMP(Math.min(p*4,(1-p)*4),0,1));
+    }
+    if(p<1)requestAnimationFrame(tick);else root.remove();
+  };
+  requestAnimationFrame(tick);
+}
 function triggerNitro(st,manual=false){
   const n=st&&st.nitro;
   if(!n||st.finish>=0||n.remaining<=0||n.cooldownLeft>0||n.activeLeft>0)return false;
+  if(manual&&!raceNitroReady)return false;
   if(manual&&n.mode!=='manual')return false;
   if(!manual&&n.mode==='manual')return false;
   n.remaining--;
   n.activeBoostMps=n.boostPercent!==null?st.speed*n.boostPercent:n.boostMps;
   n.activeLeft=Math.max(.05,n.duration);
   n.cooldownLeft=Math.max(0,n.cooldown);
+  playNitroCutin(n.animeId);
   playNitroEffect(st,n);
   if(st.racer.type&&st.racer.type.toLowerCase()==='player')updateNitroHud(st);
   return true;
@@ -993,6 +1062,20 @@ async function execCmd(line){
         sound:await getAudio('sound',soundName,'.wav','.ogg','.mp3')
       };
     }break;
+    case 'setnitrocutin':{
+      const id=A(a,0).toLowerCase();
+      const bgName=A(a,1),faceName=A(a,2),soundName=A(a,9);
+      nitroCutins[id]={
+        id,bgName,faceName,soundName,
+        bg:await getImg('effect',bgName,'.png','.jpg','.jpeg'),
+        face:await getImg('portrait',faceName,'.png','.jpg','.jpeg'),
+        bgSpeed:F(A(a,3),1.2),
+        faceX1:F(A(a,4),.7),faceY1:F(A(a,5),.2),
+        faceX2:F(A(a,6),.48),faceY2:F(A(a,7),.7),
+        seconds:Math.max(.05,F(A(a,8),.75)),
+        sound:await getAudio('sound',soundName,'.wav','.ogg','.mp3')
+      };
+    }break;
 
     case 'setracer':{
       const sid=A(a,0); let id=sid,n=2; while(racerDefs[id])id=sid+'#'+n++;
@@ -1020,7 +1103,7 @@ async function execCmd(line){
     }break;
     case 'clearracer':
       sceneDriveToken++;
-      if(!racing){stopEngine();setEngPitch(1);engGain.gain.value=sfxVol;}
+      if(!racing){stopEngine();stopCpuEngines();setEngPitch(1);engGain.gain.value=sfxVol;}
       Object.keys(racerDefs).forEach(k=>delete racerDefs[k]);
       drivenRacers.clear();
       Object.keys(racerState).forEach(k=>{try{racerState[k].cnv.remove();}catch{}delete racerState[k];});
@@ -1142,6 +1225,16 @@ let suppressNextStoryClickUntil=0;
 function latchAccel(ms=360){accelLatchUntil=Math.max(accelLatchUntil,performance.now()+ms);}
 function raceAccelActive(){return rightAccelHeld||mouse.r||performance.now()<accelLatchUntil||keys['KeyZ']||padInput.accel;}
 function raceClutchActive(){return (!mouseClutchForcedOff&&leftClutchHeld)||keys['ShiftLeft']||keys['ShiftRight']||padInput.clutch;}
+function commitShiftEffect(st,vibrate=false){
+  if(!st||st.clutchGear===st.gear)return false;
+  if(!st.shiftEffectPlayedThisClutch){
+    playShiftEffect(st);
+    if(vibrate&&navigator.vibrate)navigator.vibrate(24);
+    st.shiftEffectPlayedThisClutch=true;
+  }
+  st.clutchGear=st.gear;
+  return true;
+}
 function releaseLeftRaceInput(e){
   const rightStillHeld=rightAccelHeld||mouse.r||(typeof e.buttons==='number'&&!!(e.buttons&2));
   mouseClutchForcedOff=true;leftClutchHeld=false;mouse.l=false;gesture=null;leftReleaseGuardUntil=performance.now()+90;leftMoveReconstructAllowed=true;
@@ -1150,7 +1243,7 @@ function releaseLeftRaceInput(e){
   if(!racing)return;
   const st=rStates.find(s=>s.racer.type.toLowerCase()==='player');
   if(st){
-    if(st.clutchGear!==st.gear){playShiftEffect(st);st.clutchGear=st.gear;}
+    commitShiftEffect(st);
     st.clutch=false;
     const gearImg=document.getElementById('hud-gear');
     if(gearImg)updateGearHUD(st,gearImg);
@@ -1299,7 +1392,7 @@ function bindRacePad(id,key){
     if(key==='clutch'){
       gesture=null;
       const st=rStates.find(s=>s.racer.type.toLowerCase()==='player');
-      if(st){if(st.clutchGear!==st.gear){playShiftEffect(st);if(navigator.vibrate)navigator.vibrate(24);st.clutchGear=st.gear;}st.clutch=false;}
+      if(st){commitShiftEffect(st,true);st.clutch=false;}
     }
   };
   el.addEventListener('pointerup',release);
@@ -1356,7 +1449,7 @@ function bindMobileRaceZone(id,key){
     if(key==='clutch'){
       gesture=null;
       const st=rStates.find(s=>s.racer.type.toLowerCase()==='player');
-      if(st){if(st.clutchGear!==st.gear){playShiftEffect(st);if(navigator.vibrate)navigator.vibrate(24);st.clutchGear=st.gear;}st.clutch=false;}
+      if(st){commitShiftEffect(st,true);st.clutch=false;}
     }
   };
 
@@ -1445,7 +1538,7 @@ function onStoryClick(){
 let rStates=[];
 
 async function doRace(){
-  racing=true; forceHideUi=true; setMsgVisible(false); animMsg(1);
+  racing=true; raceNitroReady=false; forceHideUi=true; setMsgVisible(false); animMsg(1);
   mouseClutchForcedOff=false;
   racersEl.style.visibility='hidden';
   racersEl.style.display='';
@@ -1461,7 +1554,7 @@ async function doRace(){
   portraitsEl.style.display='none';
 
   // 状態初期化
-  rStates=Object.values(racerDefs).map(r=>({racer:r,speed:0,distance:0,rpm:0,gear:r.type.toLowerCase()==='player'?0:1,clutch:false,clutchGear:0,shiftCD:0,finish:-1}));
+  rStates=Object.values(racerDefs).map(r=>({racer:r,speed:0,distance:0,rpm:0,gear:r.type.toLowerCase()==='player'?0:1,clutch:false,clutchGear:0,shiftCD:0,finish:-1,shiftEffectPlayedThisClutch:false}));
   rStates.forEach(st=>{st.nitro=makeNitroState(st.racer);});
   const pSt=rStates.find(s=>s.racer.type.toLowerCase()==='player')||null;
   syncRaceRacerPositions(rStates);
@@ -1487,12 +1580,14 @@ async function doRace(){
   updateNitroHud(pSt);
   nearOff=farOff=0;
 
+  if(pSt)engBuf=pSt.racer.engineBuf||defaultEngBuf;
   startEngine();
+  startCpuEngines(rStates);
   function syncCountdownInput(){
     if(!pSt)return;
     const cl=raceClutchActive();
-    if(cl&&!pSt.clutch){pSt.clutchGear=pSt.gear;gShifted=false;}
-    if(!cl&&pSt.clutch&&pSt.clutchGear!==pSt.gear)playShiftEffect(pSt);
+    if(cl&&!pSt.clutch){pSt.clutchGear=pSt.gear;pSt.shiftEffectPlayedThisClutch=false;gShifted=false;}
+    if(!cl&&pSt.clutch)commitShiftEffect(pSt);
     pSt.clutch=cl;
     updateGearHUD(pSt,gearImg);
   }
@@ -1547,9 +1642,9 @@ async function doRace(){
     if(flyingTex)sig.src=flyingTex;
     sig.style.display='block';sig.style.opacity='1';sig.style.transform='scale(1)';
     await showFlyingMotion();
-    stopEngine();setEngPitch(1);
+    stopEngine();stopCpuEngines();setEngPitch(1);
     if(pSt){
-      pSt.speed=0;pSt.distance=0;pSt.rpm=0;pSt.gear=0;pSt.clutch=false;pSt.clutchGear=0;
+      pSt.speed=0;pSt.distance=0;pSt.rpm=0;pSt.gear=0;pSt.clutch=false;pSt.clutchGear=0;pSt.shiftEffectPlayedThisClutch=false;
       updateGearHUD(pSt,gearImg);
       const rs=racerState[pSt.racer.id];
       if(rs){syncRaceRacerPositions([pSt]);drawRacerFrame(pSt.racer.id,false,0);}
@@ -1559,13 +1654,15 @@ async function doRace(){
     while(raceAccelActive())await nextFrame();
     rightAccelHeld=false;mouse.r=false;accelLatchUntil=0;
     await waitMs(200);
-    startEngine();setEngPitch(1);
+    if(pSt)engBuf=pSt.racer.engineBuf||defaultEngBuf;
+    startEngine();startCpuEngines(rStates);setEngPitch(1);
   }
   const startSig=document.getElementById('hud-signal');
   if(signalTex[0]){startSig.src=signalTex[0];startSig.style.display='block';}
   if(signalSfx[0])playSFX(signalSfx[0]);
   startSig.style.opacity='1';startSig.style.transform='scale(1)';
   anim(500,p=>{startSig.style.opacity=1-Math.min(1,p*3);startSig.style.transform=`scale(${LERP(1,1.1,Math.min(p*3,1))})`;}).then(()=>{startSig.style.display='none';});
+  raceNitroReady=true; updateNitroHud(pSt);
 
   let raceLastT=performance.now();
   let raceElapsed=0;
@@ -1586,8 +1683,8 @@ async function doRace(){
       const accel=!isP||raceAccelActive();
       if(isP){
         const cl=raceClutchActive();
-        if(cl&&!st.clutch){st.clutchGear=st.gear;if(!gesture)gesture={x:mouse.x,y:mouse.y};gShifted=false;}
-        if(!cl&&st.clutch&&st.clutchGear!==st.gear)playShiftEffect(st);
+        if(cl&&!st.clutch){st.clutchGear=st.gear;st.shiftEffectPlayedThisClutch=false;if(!gesture)gesture={x:mouse.x,y:mouse.y};gShifted=false;}
+        if(!cl&&st.clutch)commitShiftEffect(st);
         st.clutch=cl;
         updateGearHUD(st,gearImg);
       } else {
@@ -1598,6 +1695,7 @@ async function doRace(){
         if(st.clutch){st.shiftCD-=simDt;if(st.shiftCD<=0){st.gear=Math.min(st.gear+1,gearMax(st.racer.trans));st.clutch=false;}}
       }
       simStep(st,accel,simDt);
+      if(!isP)setCpuEnginePitch(st);
       if(st.finish<0&&shouldAutoNitro(st))triggerNitro(st,false);
       stepNitro(st,simDt);
       if(st.distance>=raceSetup.dist&&st.finish<0)st.finish=elapsed;
@@ -1653,7 +1751,7 @@ async function doRace(){
       rs.cnv.style.left=raceRacerCssLeft(rs,rx)+'px';
     }
   }
-  stopEngine(); engGain.gain.value=sfxVol;
+  stopEngine(); stopCpuEngines(); engGain.gain.value=sfxVol;
   if(raceControls)raceControls.classList.remove('visible');
   if(mobileRaceInput)mobileRaceInput.classList.remove('visible');
 
@@ -1662,6 +1760,8 @@ async function doRace(){
   const won=pSt===null||winner===pSt;
   racersEl.style.display='none';
   hud.classList.add('race-finished');
+  raceNitroReady=false;
+  updateNitroHud(null);
   clutchSlowOverlay.classList.remove('active');
   if(bgmNode)bgmNode.playbackRate.value=1;
   setRaceNumbersActive(false);
@@ -1710,7 +1810,7 @@ async function doRace(){
   padInput.accel=false; padInput.clutch=false;
   clutchSlowOverlay.classList.remove('active');
   if(bgmNode)bgmNode.playbackRate.value=1;
-  racing=false; portraitsEl.style.display=''; racersEl.style.display='';
+  racing=false; raceNitroReady=false; portraitsEl.style.display=''; racersEl.style.display='';
   forceHideUi=false; if(!uiLocked)setMsgVisible(true); focusedBtn=-1;
   if(pSt&&won&&raceSetup.win)jumpTo(raceSetup.win);
   else if(pSt&&!won&&raceSetup.lose)jumpTo(raceSetup.lose);
@@ -1740,6 +1840,7 @@ function buildSave(){
   if(messageWindowName)L.push('SetMessageWindow,'+messageWindowName);
   if(uiLocked&&!msgVisible)L.push('HideLockUI');
   for(const[,a] of Object.entries(nitroAnimes))L.push(['SetNitroAnime',a.id,a.imageName,a.x1,a.y1,a.x2,a.y2,a.seconds,a.soundName].join(','));
+  for(const[,c] of Object.entries(nitroCutins))L.push(['SetNitroCutin',c.id,c.bgName,c.faceName,c.bgSpeed,c.faceX1,c.faceY1,c.faceX2,c.faceY2,c.seconds,c.soundName].join(','));
   for(const[k,n] of Object.entries(nitroDefs))L.push(['SetNitro',k,n.animeId,n.count,n.boostRaw,n.duration,n.cooldown,n.mode].join(','));
   for(const[,r] of Object.entries(racerDefs))L.push(['SetRacer',r.sid,r.idleF,r.idleFrameTime,r.driveF,r.driveFrameTime,r.autoX?'':r.x,r.y,r.type,r.trans,r.baseSpeed,r.shiftTime].join(','));
   for(const id of drivenRacers)L.push('DriveRacer,'+id);
@@ -1763,9 +1864,9 @@ function captureStagePreview(){
     try{ctx.drawImage(el,(r.left-stageRect.left)*sx,(r.top-stageRect.top)*sy,r.width*sx,r.height*sy);}catch{}
   }
   if(msgVisible&&!forceHideUi){
-    const g=ctx.createLinearGradient(0,371,0,540);g.addColorStop(0,'rgba(10,16,30,0)');g.addColorStop(.35,'rgba(10,16,30,.88)');g.addColorStop(1,'rgba(10,16,30,.97)');ctx.fillStyle=g;ctx.fillRect(0,371,960,169);
-    ctx.fillStyle='#fff';ctx.font=`bold 18px "${activeGameFontFamily}"`;ctx.fillText(spkEl.textContent,100,463);
-    ctx.font=`18px "${activeGameFontFamily}"`;let y=489;for(const line of msgEl.textContent.split('\n').slice(0,3)){ctx.fillText(line,100,y);y+=27;}
+    const g=ctx.createLinearGradient(0,390,0,540);g.addColorStop(0,'rgba(10,16,30,0)');g.addColorStop(.35,'rgba(10,16,30,.88)');g.addColorStop(1,'rgba(10,16,30,.97)');ctx.fillStyle=g;ctx.fillRect(0,390,960,150);
+    ctx.fillStyle='#fff';ctx.font=`bold 18px "${activeGameFontFamily}"`;ctx.fillText(spkEl.textContent,100,435);
+    ctx.font=`18px "${activeGameFontFamily}"`;let y=461;for(const line of msgEl.textContent.split('\n').slice(0,3)){ctx.fillText(line,100,y);y+=27;}
   }
   return out.toDataURL('image/jpeg',.72);
 }
@@ -1957,10 +2058,11 @@ function resetAll(){
   textStyle={color:'#fff',bold:false,outlineColor:'#000',outlineWidth:0};
   messageEffect='none'; messageWindowName='';
   applyTextStyle(); msgwEl.style.removeProperty('--message-window-image');
-  penX=penY=0; waiting=stopped=racing=false;
+  penX=penY=0; waiting=stopped=racing=false; raceNitroReady=false;
   padInput.accel=padInput.clutch=false;
   Object.keys(nitroDefs).forEach(k=>delete nitroDefs[k]);
   Object.keys(nitroAnimes).forEach(k=>delete nitroAnimes[k]);
+  Object.keys(nitroCutins).forEach(k=>delete nitroCutins[k]);
   document.getElementById('race-controls')?.classList.remove('visible');
   const mobileInput=document.getElementById('mobile-race-input');
   if(mobileInput){mobileInput.classList.remove('visible');mobileInput.querySelectorAll('.mobile-touch-feedback').forEach(el=>el.remove());}
@@ -1968,7 +2070,7 @@ function resetAll(){
   uiLocked=false;
   setMsgVisible(true);
   try{if(bgmNode){bgmNode.stop();bgmNode=null;}}catch{}
-  stopEngine();
+  stopEngine();stopCpuEngines();
 }
 
 async function startGame(){
@@ -2025,7 +2127,7 @@ async function initMods(){
 
 statusEl.addEventListener('click',async()=>{
   if(await pickFolder())await modsOK();
-  else statusEl.textContent='Modsフォルダが見つかりません';
+  else statusEl.innerHTML='<span class="folder-pick-link">Modsフォルダが見つかりません</span>';
 });
 document.addEventListener('dragover',e=>e.preventDefault());
 document.addEventListener('drop',async e=>{

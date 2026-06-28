@@ -40,13 +40,13 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 }
 
 /* ── メッセージ ──────────────────────── */
-#msgwrap{position:absolute;left:0;bottom:0;width:960px;height:169px;z-index:8;pointer-events:none;
-  background:var(--message-window-image,url('Mods/essential/uilayer.png')) 0 0/960px 169px no-repeat;}
-#msgbox{position:absolute;left:0;bottom:0;width:960px;height:169px;z-index:9;pointer-events:none;}
-#speaker{position:absolute;left:128px;top:42px;width:704px;height:26px;color:#fff;font-size:18px;font-weight:bold;overflow:hidden;white-space:nowrap;}
-#message{position:absolute;left:128px;top:68px;width:704px;height:104px;color:#fff;font-size:18px;line-height:1.45;overflow:hidden;white-space:pre-wrap;word-break:break-all;}
+#msgwrap{position:absolute;left:0;bottom:0;width:960px;height:150px;z-index:8;pointer-events:none;
+  background:var(--message-window-image,url('Mods/essential/uilayer.png')) 0 0/960px 150px no-repeat;}
+#msgbox{position:absolute;left:0;bottom:0;width:960px;height:150px;z-index:9;pointer-events:none;}
+#speaker{position:absolute;left:128px;top:23px;width:704px;height:26px;color:#fff;font-size:18px;font-weight:bold;overflow:hidden;white-space:nowrap;}
+#message{position:absolute;left:128px;top:49px;width:704px;height:99px;color:#fff;font-size:18px;line-height:1.45;overflow:hidden;white-space:pre-wrap;word-break:break-all;}
 #msgbox.no-speaker #speaker{display:none;}
-#msgbox.no-speaker #message{top:42px;height:130px;}
+#msgbox.no-speaker #message{top:23px;height:125px;}
 #message.msg-pop-active{animation:msg-pop-spread .34s cubic-bezier(.18,.88,.22,1.12) both;transform-origin:left center;}
 @keyframes msg-pop-spread{0%{opacity:0;transform:translateX(-18px) scaleX(.35) scaleY(.86)}58%{opacity:1;transform:translateX(5px) scale(1.04)}100%{opacity:1;transform:translateX(0) scale(1)}}
 
@@ -126,10 +126,13 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 .race-pad:active,.race-pad.active{transform:translateY(2px) scale(.985);filter:brightness(1.25);}
 #pad-clutch{left:28px;}
 #pad-accel{right:28px;background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.2),rgba(34,197,94,.22) 38%,rgba(7,12,20,.74));}
-#hud-nitro{position:absolute;right:170px;bottom:16px;min-width:108px;height:58px;border:1px solid rgba(255,255,255,.34);border-radius:8px;background:linear-gradient(180deg,rgba(30,64,175,.88),rgba(7,12,20,.88));color:#fff;font-family:inherit;font-size:18px;font-weight:bold;letter-spacing:.04em;box-shadow:0 12px 28px rgba(0,0,0,.34),inset 0 0 0 1px rgba(255,255,255,.08);pointer-events:auto;touch-action:none;}
+#hud-nitro{position:absolute;left:16px;right:auto;bottom:18px;min-width:108px;height:46px;border:1px solid rgba(255,255,255,.34);border-radius:8px;background:linear-gradient(180deg,rgba(30,64,175,.88),rgba(7,12,20,.88));color:#fff;font-family:inherit;font-size:16px;font-weight:bold;letter-spacing:.04em;box-shadow:0 12px 28px rgba(0,0,0,.34),inset 0 0 0 1px rgba(255,255,255,.08);pointer-events:auto;touch-action:none;z-index:12;}
 #hud-nitro:disabled{opacity:.36;filter:grayscale(.5);}
 #hud-nitro.ready{filter:brightness(1.18);box-shadow:0 0 18px rgba(96,165,250,.62),0 12px 28px rgba(0,0,0,.34);}
 #hud-nitro-count{display:inline-block;min-width:24px;text-align:center;}
+.nitro-cutin{position:absolute;left:0;top:0;width:960px;height:540px;overflow:hidden;z-index:160;pointer-events:none;}
+.nitro-cutin-bg{position:absolute;left:0;top:0;width:960px;height:144px;background-repeat:no-repeat;background-position:0 0;image-rendering:pixelated;}
+.nitro-cutin-face{position:absolute;left:0;top:0;max-width:none;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 8px 12px rgba(0,0,0,.55));}
 
 #hud-enemy-name,#hud-enemy-tel,#hud-player-name,#hud-gap{
   background:linear-gradient(180deg,rgba(18,24,34,.9),rgba(8,12,18,.84));
@@ -174,20 +177,25 @@ canvas{position:absolute;top:0;left:0;width:960px;height:540px;pointer-events:no
 }
 #hud-speed{
   right:26px!important;bottom:25px!important;width:430px!important;min-width:0!important;
+  z-index:8!important;
   padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;
   color:#fff!important;font-size:68px!important;font-weight:900!important;text-align:right!important;white-space:nowrap!important;
   text-shadow:-2px -2px 0 #777,2px -2px 0 #777,-2px 2px 0 #777,2px 2px 0 #777,0 5px 10px rgba(0,0,0,.75)!important;
 }
-#hud-tacho{right:219px!important;bottom:-2px!important;width:162px!important;height:162px!important;opacity:.86;}
-#hud-needle-tacho{right:219px!important;bottom:-2px!important;width:162px!important;height:162px!important;}
-#hud-gear{right:412px!important;bottom:-2px!important;width:162px!important;height:162px!important;opacity:.9;}
+#hud-tacho{right:219px!important;bottom:-2px!important;width:162px!important;height:162px!important;opacity:.86;z-index:1;}
+#hud-needle-tacho{right:219px!important;bottom:-2px!important;width:162px!important;height:162px!important;z-index:2;}
+#hud-gear{right:412px!important;bottom:-2px!important;width:162px!important;height:162px!important;opacity:.9;z-index:1;}
 #race-controls{display:none!important;}
 #hud-time,#hud-dist,#hud-speed{visibility:hidden!important;}
 .sprite-numbers{position:absolute;z-index:2;pointer-events:none;transform-origin:center center;}
+#SpeedDisplay{z-index:8;}
 .sprite-numbers canvas{position:absolute;image-rendering:pixelated;pointer-events:none;}
+#race-controls.visible{display:block!important;position:absolute;left:0;right:0;bottom:18px;height:118px;z-index:120;pointer-events:none;}
+#race-controls.visible .race-pad{display:none;}
 
 @media (pointer:coarse){
   #race-controls.visible{display:block!important;position:absolute;inset:0;height:auto;z-index:120;pointer-events:none;}
+  #race-controls.visible .race-pad{display:flex;}
   #race-controls .race-pad{top:0;bottom:0;width:50%;height:100%;border:0;border-radius:0;background:transparent;box-shadow:none;color:transparent;opacity:1;transform:none;touch-action:none;}
   #race-controls #pad-clutch{left:0;right:auto;}
   #race-controls #pad-accel{left:auto;right:0;}
@@ -228,9 +236,9 @@ body.mobile-build .tbtn{
   box-shadow:0 6px 18px rgba(0,0,0,.3);
 }
 body.mobile-build .tbtn:active{transform:translateY(2px);filter:brightness(.9);}
-body.mobile-build #speaker{left:16px;top:38px;width:864px;font-size:22px;}
-body.mobile-build #message{left:16px;top:70px;width:864px;height:99px;font-size:22px;line-height:1.28;}
-body.mobile-build #msgbox.no-speaker #message{top:42px;height:127px;}
+body.mobile-build #speaker{left:16px;top:18px;width:864px;font-size:22px;}
+body.mobile-build #message{left:16px;top:50px;width:864px;height:98px;font-size:22px;line-height:1.28;}
+body.mobile-build #msgbox.no-speaker #message{top:22px;height:126px;}
 body.mobile-build #util{right:10px;bottom:8px;gap:7px;}
 body.mobile-build .ubtn{width:46px;height:46px;}
 body.mobile-build .ubtn img{width:30px;height:30px;opacity:.9;}
