@@ -134,7 +134,12 @@ h1 {
 .btn:not(:disabled):active { transform: scale(0.97); }
 .btn-convert { background: #c87820; color: #fff; }
 .btn-dl      { background: #5a8a3c; color: #fff; }
-.slot-actions { display: flex; gap: 10px; margin-bottom: 18px; }
+.slot-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 18px;
+}
 .btn-add-slot { background: #8b4513; color: #fff; }
 .btn-remove-slot { background: #a07850; color: #fff; }
 
@@ -206,6 +211,7 @@ h1 {
   .slot-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    justify-content: stretch;
     gap: 10px;
   }
   .btn { padding: 14px 10px; font-size: 0.95rem; width: 100%; }
