@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.29.106';
+const RAT_BROWSER_VERSION='2026.06.30.108';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -651,7 +651,9 @@ function updateNitroHud(st){
   if(!n)return;
   cnt.textContent=n.remaining;
   const ready=raceNitroReady&&n.remaining>0&&n.cooldownLeft<=0&&n.activeLeft<=0&&(!st||st.finish<0);
-  btn.disabled=!ready;
+  btn.disabled=false;
+  btn.setAttribute('aria-disabled',ready?'false':'true');
+  btn.classList.toggle('disabled',!ready);
   btn.classList.toggle('ready',ready);
 }
 function playNitroEffect(st,n){
@@ -1488,25 +1490,40 @@ bindRacePad('pad-accel','accel');
 bindRacePad('pad-clutch','clutch');
 const nitroButton=document.getElementById('hud-nitro');
 function pointInNitroButton(e){
-  if(!nitroButton||!racing||nitroButton.disabled||nitroButton.style.display==='none')return false;
+  if(!nitroButton||!racing||nitroButton.style.display==='none')return false;
   const r=nitroButton.getBoundingClientRect();
   return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;
+}
+function canTriggerManualNitro(st){
+  const n=st&&st.nitro;
+  return !!(raceNitroReady&&n&&n.mode==='manual'&&st.finish<0&&n.remaining>0&&n.cooldownLeft<=0&&n.activeLeft<=0);
 }
 function triggerNitroButton(e){
   if(!pointInNitroButton(e))return;
   if(e.preventDefault)e.preventDefault();
   if(e.stopPropagation)e.stopPropagation();
   if(e.stopImmediatePropagation)e.stopImmediatePropagation();
-  if(typeof e.buttons==='number'&&(e.buttons&2)){rightAccelHeld=true;mouse.r=true;latchAccel(1000);}
+  const rightHeld=rightAccelHeld||mouse.r||(typeof e.buttons==='number'&&!!(e.buttons&2));
+  if(rightHeld){rightAccelHeld=true;mouse.r=true;latchAccel(1000);}
   const ps=rStates.find(s=>s.racer.type.toLowerCase()==='player');
-  triggerNitro(ps,true);
+  if(canTriggerManualNitro(ps)){
+    triggerNitro(ps,true);
+    updateNitroHud(ps);
+  }
 }
 if(nitroButton){
   nitroButton.addEventListener('pointerdown',triggerNitroButton,{passive:false});
+  nitroButton.addEventListener('pointerup',triggerNitroButton,{passive:false});
   nitroButton.addEventListener('mousedown',triggerNitroButton,{passive:false});
+  nitroButton.addEventListener('mouseup',triggerNitroButton,{passive:false});
+  nitroButton.addEventListener('click',triggerNitroButton,{passive:false});
+  nitroButton.addEventListener('contextmenu',triggerNitroButton,{passive:false});
 }
 window.addEventListener('pointerdown',triggerNitroButton,{capture:true,passive:false});
+window.addEventListener('pointerup',triggerNitroButton,{capture:true,passive:false});
 window.addEventListener('mousedown',triggerNitroButton,{capture:true,passive:false});
+window.addEventListener('mouseup',triggerNitroButton,{capture:true,passive:false});
+window.addEventListener('click',triggerNitroButton,{capture:true,passive:false});
 window.addEventListener('touchstart',e=>{
   const t=e.changedTouches&&e.changedTouches[0];
   if(t)triggerNitroButton(t);
