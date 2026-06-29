@@ -1,4 +1,4 @@
-const RAT_BROWSER_VERSION='2026.06.29.101';
+const RAT_BROWSER_VERSION='2026.06.29.105';
 const MOBILE_BUILD=true;
 
 function initStartupSplash(){
@@ -285,6 +285,7 @@ let forceHideUi=false;
 let curSpeaker='',curPid='',curText='';
 let textStyle={color:'#fff',bold:false,outlineColor:'#000',outlineWidth:0};
 let messageEffect='none', messageWindowName='';
+const DEFAULT_MESSAGE_WINDOW_URL='Mods/essential/uilayer.png';
 let bgName='',nearName='',farName='',bgmName='',effectName='';
 let nearOff=0,farOff=0,raceBgSpeed=0;
 let raceZoom={racerId:'',amount:0};
@@ -411,10 +412,21 @@ function startType(speaker,pid,text){
   // ポートレートdim
   document.querySelectorAll('.portrait').forEach(p=>p.classList.toggle('dim',p.dataset.pid!==pid));
   clearType(); typeIdx=0; msgEl.textContent='';
-  msgEl.classList.remove('msg-pop-active');
-  if(messageEffect.toLowerCase()==='popspread'){
+  msgEl.classList.remove('msg-pop-active','msg-shake-active','msg-wave-active','msg-pulse-active','msg-slide-active','msg-fade-active','msg-impact-active','msg-glitch-active','msg-whisper-active');
+  const effectClass={
+    popspread:'msg-pop-active',
+    shake:'msg-shake-active',
+    wave:'msg-wave-active',
+    pulse:'msg-pulse-active',
+    slidein:'msg-slide-active',
+    fadein:'msg-fade-active',
+    impact:'msg-impact-active',
+    glitch:'msg-glitch-active',
+    whisper:'msg-whisper-active'
+  }[(messageEffect||'').toLowerCase()];
+  if(effectClass){
     void msgEl.offsetWidth;
-    msgEl.classList.add('msg-pop-active');
+    msgEl.classList.add(effectClass);
   }
   const wait=S.get('tw',0.05)*1000/6;
   if(wait<=0){renderMessageText(typeFull);return;}
@@ -862,6 +874,11 @@ const msgboxEl=document.getElementById('msgbox');
 const utilEl=document.getElementById('util');
 const clutchSlowOverlay=document.getElementById('clutch-slow-overlay');
 let msgOffY=0;
+function restoreDefaultMessageWindow(){
+  messageWindowName='';
+  msgwEl.style.setProperty('--message-window-image',`url("${DEFAULT_MESSAGE_WINDOW_URL}")`);
+}
+restoreDefaultMessageWindow();
 function setMsgVisible(v,locked=false){msgVisible=v;if(v)uiLocked=false;else if(locked)uiLocked=true;}
 function animMsg(dt){
   const hidden=forceHideUi||!msgVisible;
@@ -1015,10 +1032,10 @@ async function execCmd(line){
       messageWindowName=A(a,0);
       const img=await getImg('ui',messageWindowName,'.png','.jpg','.jpeg');
       if(img)msgwEl.style.setProperty('--message-window-image',`url("${img.src}")`);
-      else msgwEl.style.removeProperty('--message-window-image');
+      else restoreDefaultMessageWindow();
     }break;
     case 'clearmessagewindow':
-      messageWindowName=''; msgwEl.style.removeProperty('--message-window-image'); break;
+      restoreDefaultMessageWindow(); break;
 
     case 'wipein':
       await wipeIn(A(a,0)||'AroundToCenter',F(A(a,1),1));
@@ -2147,8 +2164,8 @@ function resetAll(){
   clearRaceZoom();
   curSpeaker=curPid=curText='';
   textStyle={color:'#fff',bold:false,outlineColor:'#000',outlineWidth:0};
-  messageEffect='none'; messageWindowName='';
-  applyTextStyle(); msgwEl.style.removeProperty('--message-window-image');
+  messageEffect='none';
+  applyTextStyle(); restoreDefaultMessageWindow();
   penX=penY=0; waiting=stopped=racing=false; raceNitroReady=false;
   padInput.accel=padInput.clutch=false;
   Object.keys(nitroDefs).forEach(k=>delete nitroDefs[k]);
