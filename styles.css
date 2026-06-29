@@ -302,7 +302,7 @@ body.mobile-build .slot-savebtn,body.mobile-build .slot-loadbtn{height:40px;font
 body.mobile-build #saves-close{position:fixed;}
 
 body.mobile-build #race-controls .race-pad::after{
-  content:"";position:absolute;bottom:107px;width:118px;height:118px;border-radius:50%;
+  content:"";position:absolute;bottom:117px;width:118px;height:118px;border-radius:50%;
   border:2px solid rgba(255,255,255,.14);background:rgba(0,0,0,.05);
   box-shadow:inset 0 0 24px rgba(255,255,255,.04);transition:.12s ease;
 }
