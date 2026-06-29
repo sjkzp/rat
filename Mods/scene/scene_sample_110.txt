@@ -1,5 +1,5 @@
 #top
-,,フォントやメッセージウィンドウなど表示カスタムのサンプルです
+,,表示カスタムサンプルです
 ,,このサンプルを動かしているシーンファイルは<br>「Mods/scene」フォルダ内の「scene_sample_110.txt」です
 ,,文字色、太字、縁取り、メッセージの表示エフェクト、<br>メッセージウィンドウ画像の差し替えを確認できます
 
@@ -7,7 +7,7 @@
 SetPen,0.1,0.1
 SetPanel,,,◆表示カスタム,Left,,,,,0.78,
 SetPen,0.1,0.2
-SetPanel,Selectable,#font_sample,フォントスタイル,Left,,,,,0.36,
+SetPanel,Selectable,#font_sample,フォントスタイル・文字演出,Left,,,,,0.36,
 SetPanel,Selectable,#game_font_sample,ゲーム風パターン,Left,,,,,0.36,
 SetPanel,Selectable,#window_sample,メッセージウィンドウ,Left,,,,,0.36,
 SetPanel,Selectable,#back,サンプル一覧に戻る,Left,,,,,0.36,
@@ -17,33 +17,52 @@ Stop
 #font_sample
 DisposelAllPanels
 ,,まずは通常の文字表示です
-SetTextStyle,#ffdd66,true,#663300,2
-SetMessageEffect,PopSpread
-,,文字色を変え、太字と縁取りを設定しています<br>メッセージは少し固まってから広がるように表示されます
-SetTextStyle,#66ddff,false,#003366,2
-,,色や太字の有無を変えることで、話者や場面ごとの雰囲気を調整できます
+SetTextStyle,#ffdd66,false,#000000,0
+,,文字色だけを黄色に変更しています
+SetTextStyle,#ffffff,true,#000000,0
+,,太字だけをONにしています
+SetTextStyle,#ffffff,false,#003366,2
+,,縁取りだけをONにしています
 ClearTextStyle
+,,フォントスタイルをOFFに戻しました
+,,SetMessageEffectで、メッセージの表示演出だけを切り替えます
+SetMessageEffect,PopSpread
+,,PopSpread：ポップなリアクションや明るい台詞に向いています
+SetMessageEffect,Shake
+,,Shake：怒鳴り声、衝撃、焦りを表現しやすい演出です
+SetMessageEffect,Wave
+,,Wave：軽い冗談、夢っぽい場面、コミカルな台詞に使えます
+SetMessageEffect,Pulse
+,,Pulse：強調したい一言や、心拍のような緊張感に向いています
+SetMessageEffect,SlideIn
+,,SlideIn：アナウンス、無線、ナレーションの入りに使いやすい演出です
+SetMessageEffect,FadeIn
+,,FadeIn：回想や静かな台詞、余韻を出したい場面に向いています
+SetMessageEffect,Impact
+,,Impact：勝負開始、挑発、重要ワードを強く見せたいときに使えます
+SetMessageEffect,Glitch
+,,Glitch：通信障害、機械音声、不穏な場面に向いています
+SetMessageEffect,Whisper
+,,Whisper：独白、小声、秘密っぽい台詞に使えます
 ClearMessageEffect
-,,フォントスタイルをOFFにしました
+,,文字演出をOFFに戻しました
 Jump,#retry_select
 
 #game_font_sample
 DisposelAllPanels
-,,ゲームで使いやすい文字装飾の組み合わせ例です
-SetTextStyle,#ffffff,true,#000000,2
-,,【Racing HUD】<br>白文字＋黒い太縁は、レース中の説明や勝敗コメントに向いています
-SetTextStyle,#ffdd33,true,#5a2600,2
-SetMessageEffect,PopSpread
-,,【Arcade Pop】<br>黄色文字＋濃い縁取りは、ショップ、報酬、当たり演出に使いやすいです
-SetTextStyle,#ff3344,true,#ffffff,2
-,,【Danger Alert】<br>赤文字＋白縁は、警告、危険な場面を強く見せられます
-SetTextStyle,#ffd76a,true,#2b1200,2
-,,【Victory Gold】<br>金色文字＋黒茶の縁取りは、勝利、賞金、達成演出に向いています
-SetTextStyle,#66ff88,false,#001a08,1
-ClearMessageEffect
-,,【Retro Console】<br>緑文字＋細い縁取りは、システムメッセージや機械的な表示に使えます
+,,ゲームで使いやすい文字色の単体例です
+SetTextStyle,#ffffff,false,#000000,0
+,,【Racing White】<br>白文字は、レース中の説明や勝敗コメントに向いています
+SetTextStyle,#ffdd33,false,#000000,0
+,,【Arcade Yellow】<br>黄色文字は、ショップ、報酬、当たり演出に使いやすいです
+SetTextStyle,#ff3344,false,#000000,0
+,,【Danger Red】<br>赤文字は、警告、フライング、危険な場面を強く見せられます
+SetTextStyle,#ffd76a,false,#000000,0
+,,【Victory Gold】<br>金色文字は、勝利、賞金、達成演出に向いています
+SetTextStyle,#66ff88,false,#000000,0
+,,【Retro Green】<br>緑文字は、システムメッセージや機械的な表示に使えます
 ClearTextStyle
-,,ゲーム風パターンをOFFにしました
+,,文字色をOFFに戻しました
 Jump,#retry_select
 
 #window_sample
